@@ -292,7 +292,7 @@ class Hierarchy
 
             // instead of appending, we need to inject
             // but only if we're not dealing with an alternate Posts Page
-            if( !$posts_page || ( $posts_page != $pages[$i]['ID'] ) )
+            if( empty( $posts_page ) || ( $posts_page != $pages[$i]['ID'] ) )
             {
                 $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
             }

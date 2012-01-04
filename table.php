@@ -121,7 +121,7 @@ class HierarchyTable extends WP_List_Table
 
             $posts_page = ( 'page' == get_option( 'show_on_front' ) ) ? intval( get_option( 'page_for_posts' ) ) : false;
 
-            if( $cpt->name == 'post' && $posts_page )
+            if( $cpt->name == 'post' && !empty( $posts_page ) )
             {
                 $title = $item['pad'] . get_the_title( $posts_page );
             }

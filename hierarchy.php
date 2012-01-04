@@ -152,9 +152,10 @@ class Hierarchy
     }
 
 
-    function get_pad( $post )
+    function get_pad_count( $post )
     {
         $level = 0;
+
         if( (int) $post->post_parent > 0 )
         {
             $find_main_page = (int) $post->post_parent;
@@ -167,12 +168,16 @@ class Hierarchy
 
                 $level++;
                 $find_main_page = (int) $parent->post_parent;
-
-                if ( !isset( $parent_name ) )
-                    $parent_name = apply_filters( 'the_title', $parent->post_title, $parent->ID );
             }
         }
-        return str_repeat( '&#8212; ', $level );
+
+        return intval( $level );
+    }
+
+
+    function get_pad( $post )
+    {
+        return str_repeat( '&#8212; ', self::get_pad_count( $post ) );
     }
 
 
@@ -200,7 +205,9 @@ class Hierarchy
                     'title'     => $title,
                     'author'    => $author->display_name,
                     'comments'  => $page->comment_count,
-                    'date'      => date( get_option( 'date_format' ), strtotime( $page->post_date ) )
+                    'date'      => date( get_option( 'date_format' ), strtotime( $page->post_date ) ),
+                    'order'     => $page->menu_order,
+                    'parent'    => $page->post_parent
                 );
         }
 
@@ -226,8 +233,14 @@ class Hierarchy
         // loop through the pages because we're building our tree one link at a time
         for( $i = 0; $i < count( $pages ); $i++ )
         {
-            $handled        = false;
             $target_parent  = 0;        // safe to assume there's no parent
+
+            // we'll always want to add the page to the Hierarchy
+            $hierarchy[] = array(
+                    'entry'     => $pages[$i],
+                    'order'     => $pages[$i]['order'],
+                    'parent'    => $pages[$i]['parent']
+                );
 
             // we're going to loop through all of the CPTs WP knows about
             // because we might not have any settings for them
@@ -242,6 +255,8 @@ class Hierarchy
                 {
                     $post_type = '';
                 }
+
+                $order = ( !empty( $settings['post_types'][$post_type]['order'] ) ) ? intval( $settings['post_types'][$post_type]['order'] ) : 0;
 
                 // we can only figure out the parent if WordPress knows about the archive slug
                 if( isset( $wp_rewrite->extra_permastructs[$post_type] )
@@ -278,15 +293,16 @@ class Hierarchy
                         'title'     => $post_type,
                         'author'    => '',
                         'comments'  => '&ndash;',
-                        'date'      => ''
+                        'date'      => '',
+                        'order'     => $order
                     );
 
-                    // we need to first add in the original parent
-                    $hierarchy[]    = $pages[$i];
-
                     // lastly we'll append our CPT and flag it as handled
-                    $hierarchy[]    = $cpt;
-                    $handled        = true;
+                    $hierarchy[] = array(
+                            'entry'     => $cpt,
+                            'order'     => $order,
+                            'parent'    => $target_parent
+                        );
 
                     // we've added our CPT index entry, but we need to handle the CPT entries as well
                     // TODO: pull CPT entries for applicable CPT and output as rows
@@ -299,10 +315,6 @@ class Hierarchy
                     unset( $post_types[$post_type] );
                 }
             }
-
-            if( !$handled )
-                $hierarchy[] = $pages[$i];
-
         }
 
         // check to see if we need to append additional orphan CPTs
@@ -311,19 +323,80 @@ class Hierarchy
             // we have some 'left over' CPTs that have no parents so let's append them
             foreach( $post_types as $post_type )
             {
-                $cpt = array(
-                    'ID'        => $post_type->name,
-                    'pad'       => '',
-                    'title'     => $post_type->name,
-                    'author'    => '',
-                    'comments'  => '&ndash;',
-                    'date'      => ''
-                );
-                $hierarchy[]    = $cpt;
+                // we definitely do not want to include Pages here
+                if( $post_type->name != 'page' )
+                {
+                    // we need to put it in the proper place
+                    $order = ( !empty( $settings['post_types'][$post_type->name]['order'] ) ) ? intval( $settings['post_types'][$post_type->name]['order'] ) : 0;
+
+                    $cpt = array(
+                        'ID'            => $post_type->name,
+                        'pad'           => '',
+                        'title'         => $post_type->name,
+                        'author'        => '',
+                        'comments'      => '&ndash;',
+                        'date'          => '',
+                        'order'         => $order
+                    );
+
+                    $new = array(
+                            'entry'     => $cpt,
+                            'order'     => $order,
+                            'parent'    => 0
+                        );
+
+                    // instead of appending, we need to inject
+                    $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
+                }
             }
         }
 
         return $hierarchy;
+    }
+
+
+    function inject_hierarchy_entry( $existing = array(), $new = array() )
+    {
+        // note that $existing is already in order and we want to inject $new in the proper place on the proper level
+
+        if( $new['parent'] != 0 )
+        {
+            // loop through the existing Hierarchy until we find our parent
+        }
+        else
+        {
+            // it's a top level CPT so we just need to place it appropriately on level 1
+            $order = intval( $new['order'] );
+
+            $last_index     = 0;
+            $target_index   = -1;
+
+            for( $i = 0; $i < count( $existing ); $i++ )
+            {
+                if( isset( $existing[$i]['parent'] ) && $existing[$i]['parent'] == 0 )
+                {
+                    // we only want to proceed when we're working with the first level
+                    $last_index = $i;
+                    if( $order < intval( $existing[$i]['order'] ) )
+                    {
+                        // we've hit a ceiling
+                        $target_index = $last_index;
+                        break;
+                    }
+                }
+            }
+
+            // we might be dealing with the last entry
+            if( $target_index === -1 )
+                $target_index = count( $existing );
+
+            // we'll insert our new entry in the appropriate place
+            array_splice( $existing, $target_index, 0, array( $new ) );
+
+        }
+
+        return $existing;
+
     }
 
 

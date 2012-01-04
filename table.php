@@ -22,6 +22,8 @@ class HierarchyTable extends WP_List_Table
     // default column
     function column_default( $item, $column_name )
     {
+        $item = $item['entry'];
+
         switch( $column_name )
         {
             case 'title':
@@ -69,6 +71,8 @@ class HierarchyTable extends WP_List_Table
     // checkbox column
     function column_cb( $item )
     {
+        $item = $item['entry'];
+
         return sprintf(
             '<input type="checkbox" name="%1$s[]" value="%2$s" />',
             /*$1%s*/ $this->_args['singular'],  // Let's simply repurpose the table's singular label ("movie")
@@ -81,6 +85,8 @@ class HierarchyTable extends WP_List_Table
     {
         // build row actions
         $actions = array();
+
+        $item = $item['entry'];
 
         $title = $item['title'];
 
@@ -128,6 +134,8 @@ class HierarchyTable extends WP_List_Table
 
     function column_comments( $item )
     {
+        $item = $item['entry'];
+
         return '<div class="post-com-count-wrapper"><a href="#" class="post-com-count"><span class="comment-count">' . $item['comments'] . '</span></a></div>';
     }
 

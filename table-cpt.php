@@ -25,8 +25,8 @@ class HierarchyCPTTable extends WP_List_Table
         switch( $column_name )
         {
             case 'title':
-            case 'cptparent':
             case 'order':
+            case 'show_entries':
                 return $item[$column_name];
             default:
                 return print_r( $item, true ); // worst case, output for debugging
@@ -37,9 +37,9 @@ class HierarchyCPTTable extends WP_List_Table
     function get_columns()
     {
         $columns = array(
-            'title'     => 'Custom Post Type',
-            'cptparent' => 'Parent',
-            'order'     => 'Order'
+            'title'         => 'Custom Post Type',
+            'show_entries'  => 'Show Entries',
+            'order'         => 'Order'
         );
         return $columns;
     }
@@ -50,26 +50,21 @@ class HierarchyCPTTable extends WP_List_Table
         return $item['title'];
     }
 
-    function column_cptparent( $item )
-    {
-        if( is_array( $item['parents'] ) && count( $item['parents'] ) )
-        {
-            $pages = '';
-            foreach( $item['parents'] as $parent )
-            {
-                $pages .= '<option value="' . $parent['ID'] . '"';
-                $pages .= ( intval( $parent['ID'] ) === intval( $item['cptparent'] ) ) ? ' selected="selected"' : '' ;
-                $pages .= '>' . $parent['title'] . '</option>';
-
-            }
-        }
-
-        return '<select name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][parent]"><option value="0">&mdash; No Parent &mdash;' . $pages . '</option></select>';
-    }
 
     function column_order( $item )
     {
         return '<input type="text" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" value="' . $item['order'] . '" class="small-text" />';
+    }
+
+
+    function column_show_entries( $item )
+    {
+        $input = '<input type="checkbox" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][show_entries]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][show_entries]" value="1"';
+        if( $item['show_entries'] )
+            $input .= ' checked="checked"';
+        $input .= '/>';
+
+        return $input;
     }
 
 
@@ -88,11 +83,7 @@ class HierarchyCPTTable extends WP_List_Table
         // define our data to be shown
         $data = $cpts;
 
-        // HERE IS WHERE THE QUERY GOES
-
-        // find out what page we're currently on and get pagination set up
         $current_page   = $this->get_pagenum();
-        // $total_items    = count( $data );
 
         // the class doesn't handle pagination, so we need to trim the data to only the page we're viewing
         $data           = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );

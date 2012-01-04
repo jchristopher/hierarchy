@@ -117,6 +117,9 @@ class HierarchyTable extends WP_List_Table
             if( $cpt->has_archive )
                 $actions['view'] = '<a href="' . get_post_type_archive_link( $cpt->name ) . '">View</a>';
 
+            $add_url = get_admin_url() . 'post-new.php?post_type=' . $cpt->name;
+            $actions['add'] = '<a href="' . $add_url . '">Add New</a>';
+
         }
 
         // Return the title contents

@@ -114,13 +114,17 @@ class Hierarchy
         global $menu;
 
         // add our 'Content' menu
-        $position = isset( $menu[3] ) ? null : 3;
+        $position = 3;                      // ideally we're in position 3, just below the Dashboard, but above the separator
+        while( isset( $menu[$position] ) )  // we don't want to override an existing $menu entry so let's find the closest
+            $position++;
 
+        // add our menu item
         add_menu_page( "Content", "Content", "edit_posts", "hierarchy", array( $this, "show_hierarchy" ), null, $position );
 
         // do we need to remove any menu entries?
         if( is_array( $this->post_types ) )
         {
+            // loop through available post types and check to see if any are supposed to be hidden
             foreach( $this->post_types as $post_type )
             {
                 if( isset( $this->settings['hidden_from_admin_menu'] )
@@ -129,6 +133,7 @@ class Hierarchy
                        )
                   )
                 {
+                    // yes it needs to be hidden, we need to determine the slug as that's the index used for deletion
                     if( $post_type->name == 'post' )
                     {
                         $menu_slug = 'edit.php';
@@ -137,6 +142,8 @@ class Hierarchy
                     {
                         $menu_slug = 'edit.php?post_type=' . $post_type->name;
                     }
+
+                    // get rid of it
                     remove_menu_page( $menu_slug );
                 }
             }
@@ -203,6 +210,8 @@ class Hierarchy
 
     function get_hierarchy()
     {
+        global $wp_rewrite;
+
         $settings = get_option( HIERARCHY_PREFIX . 'settings' );
 
         // we always work from Pages as the base
@@ -211,51 +220,107 @@ class Hierarchy
         // will hold the final Hierarchy
         $hierarchy = array();
 
-        // loop through the pages
+        // store our post types
+        $post_types = $this->get_post_types();
+
+        // loop through the pages because we're building our tree one link at a time
         for( $i = 0; $i < count( $pages ); $i++ )
         {
-            $handled = false;
+            $handled        = false;
+            $target_parent  = 0;        // safe to assume there's no parent
 
-            // do we even have anything to do?
-            if( isset(  $settings['post_types'] ) && count( $settings['post_types'] ) )
+            // we're going to loop through all of the CPTs WP knows about
+            // because we might not have any settings for them
+            // if the settings have not been re-saved
+            foreach( $post_types as $post_type )
             {
-                // loop through each of the post types to see if we have an applicable parent
-                foreach( $settings['post_types'] as $post_type => $attributes )
+                if( isset( $post_type->name ) )
                 {
-                    $target_parent = $attributes['parent'];
+                    $post_type = $post_type->name;
+                }
+                else
+                {
+                    $post_type = '';
+                }
 
-                    if( $pages[$i]['ID'] == $target_parent )
+                // we can only figure out the parent if WordPress knows about the archive slug
+                if( isset( $wp_rewrite->extra_permastructs[$post_type] )
+                    && $wp_rewrite->extra_permastructs[$post_type][1] ) // make sure rewrite is enabled
+                {
+                    // we have a permalink structure for the CPT at hand...
+                    $cpt_archive_slug = $wp_rewrite->extra_permastructs[$post_type][0];
+
+                    // let's break it up into URI segments
+                    $cpt_archive_slug = explode( '/', $cpt_archive_slug );
+
+                    // the last two segments represent the CPT archive and the slug, so we need everything before that
+
+                    // that said, if the array isn't at least 3 keys, there is no possible parent
+                    if( count( $cpt_archive_slug ) > 2 )
                     {
-                        // we do have an applicable parent, let's build in our CPT entry
-                        $cpt = array(
-                            'ID'        => $post_type,
-                            'pad'       => Hierarchy::get_pad( get_page( $target_parent ) ) . '&#8212; ',
-                            'title'     => $post_type,
-                            'author'    => 'author',
-                            'comments'  => -1,
-                            'date'      => 'date'
-                        );
+                        $parent_slug = implode( '/', array_slice( $cpt_archive_slug, 0, count( $cpt_archive_slug ) - 2 ) );
 
-                        // we need to first add in the original parent
-                        $hierarchy[]    = $pages[$i];
+                        // we have the parent's slug
+                        $parent_page = get_page_by_path( $parent_slug );
 
-                        // lastly we'll append our CPT and flag it as handled
-                        $hierarchy[]    = $cpt;
-                        $handled        = true;
-
-                        // we've added our CPT index entry, but we need to handle the CPT entries as well
-                        // TODO: pull CPT entries for applicable CPT and output as rows
-
-                        // TODO: test integration with 'page' style CTPs and parent levels therein
-
-                        // TODO: determine the best way to integrate taxonomies
+                        // let's fetch the ID and be done with it
+                        if( isset( $parent_page->ID ) )     // this could be undefined if Permalinks have not been regenerated
+                            $target_parent = $parent_page->ID;
                     }
+                }
+
+                if( $pages[$i]['ID'] == $target_parent )
+                {
+                    // we do have an applicable parent, let's build in our CPT entry
+                    $cpt = array(
+                        'ID'        => $post_type,
+                        'pad'       => Hierarchy::get_pad( get_page( $target_parent ) ) . '&#8212; ',
+                        'title'     => $post_type,
+                        'author'    => '',
+                        'comments'  => '&ndash;',
+                        'date'      => ''
+                    );
+
+                    // we need to first add in the original parent
+                    $hierarchy[]    = $pages[$i];
+
+                    // lastly we'll append our CPT and flag it as handled
+                    $hierarchy[]    = $cpt;
+                    $handled        = true;
+
+                    // we've added our CPT index entry, but we need to handle the CPT entries as well
+                    // TODO: pull CPT entries for applicable CPT and output as rows
+
+                    // TODO: test integration with 'page' style CTPs and parent levels therein
+
+                    // TODO: determine the best way to integrate taxonomies
+
+                    // we'll never need this again so we'll remove it because we're going to dump out the leftovers at the end
+                    unset( $post_types[$post_type] );
                 }
             }
 
             if( !$handled )
                 $hierarchy[] = $pages[$i];
 
+        }
+
+        // check to see if we need to append additional orphan CPTs
+        if( !empty( $post_types ) )
+        {
+            // we have some 'left over' CPTs that have no parents so let's append them
+            foreach( $post_types as $post_type )
+            {
+                $cpt = array(
+                    'ID'        => $post_type->name,
+                    'pad'       => '',
+                    'title'     => $post_type->name,
+                    'author'    => '',
+                    'comments'  => '&ndash;',
+                    'date'      => ''
+                );
+                $hierarchy[]    = $cpt;
+            }
         }
 
         return $hierarchy;
@@ -290,8 +355,8 @@ class Hierarchy
 
     function assets()
     {
-        // add options menu
-        add_options_page( 'Settings', 'Hierarchy', 'manage_options', __FILE__, array( 'Hierarchy', 'admin_settings' ) );
+        // add options menu under Appearance
+        add_submenu_page( 'themes.php', 'Hierarchy', 'Hierachy', 'manage_options', __FILE__, array( 'Hierarchy', 'admin_settings' ) );
     }
 
     function admin_settings()
@@ -319,7 +384,7 @@ class Hierarchy
         // table for placing CPTs
         add_settings_field(
             HIERARCHY_PREFIX . 'cpts',                      // unique field ID
-            'Place Custom Post Types',                      // title
+            'Custom Post Type Locations',                   // title
             array( 'Hierarchy', 'edit_cpt_placement' ),     // input box display callback
             HIERARCHY_PREFIX . 'settings',                  // page name (as above)
             HIERARCHY_PREFIX . 'settings'                   // first arg to add_settings_section
@@ -362,24 +427,46 @@ class Hierarchy
         {
             $post_type_name = $post_type->name;
 
-            $parent = isset( $settings['post_types'][$post_type_name]['parent'] ) ? intval( $settings['post_types'][$post_type_name]['parent'] ) : 0;
             $order = isset( $settings['post_types'][$post_type_name]['order'] ) ? intval( $settings['post_types'][$post_type_name]['order'] ) : 0;
 
             $post_types[] = array(
-                    'name'      => $post_type_name,
-                    'title'     => $post_type->labels->name,
-                    'parents'   => self::get_pages(),
-                    'cptparent' => $parent,
-                    'order'     => $order
+                    'name'          => $post_type_name,
+                    'title'         => $post_type->labels->name,
+                    'show_entries'  => isset( $settings['post_types'][$post_type_name]['show_entries'] ) ? true : false,
+                    'order'         => $order
                 );
         }
 
         $table = new HierarchyCPTTable();
+
+        // since we use Pages as the basis, we do not want them here
+        for( $i = 0; $i < count( $post_types ); $i++ )
+        {
+            if( $post_types[$i]['name'] == 'page' )
+                unset( $post_types[$i] );
+        }
+
+        // prepare our data
         $table->prepare_items( $post_types, self::get_pages() );
-        echo '<div id="hierarchy-cpt-wrapper">';
-        $table->display();
-        echo '</div><style type="text/css">#hierarchy-cpt-wrapper{margin-bottom:20px;}#hierarchy-cpt-wrapper .tablenav { display:none; }#hierarchy-cpt-wrapper select { display:block; max-width:95%;}</style>';
-    }
+
+        // output the table
+        ?>
+        <div id="hierarchy-cpt-wrapper">
+            <?php $table->display(); ?>
+            <p>
+                <strong>Show Entries:</strong> when checked, the entries for the CPT will be included in the Hierarchy list
+                <br />
+                <strong>Order:</strong> customize the <code>menu_order</code> for the CPT
+            </p>
+        </div>
+        <style type="text/css">
+            #hierarchy-cpt-wrapper p { padding-top:5px; }
+            #hierarchy-cpt-wrapper .tablenav { display:none; }
+            #hierarchy-cpt-wrapper .column-title { width:60%; }
+            #hierarchy-cpt-wrapper .column-show_entries { width:20%; }
+            #hierarchy-cpt-wrapper .column-order { width:20%; }
+        </style>
+    <?php }
 
 
     function edit_hidden_post_types()
@@ -409,10 +496,6 @@ class Hierarchy
         $output     = 'objects';
         $operator   = 'and';
         $post_types = get_post_types( $args, $output, $operator );
-
-        // since we use Pages as the basis, we do not want them here
-        if( isset( $post_types['page'] ) )
-            unset( $post_types['page'] );
 
         return $post_types;
     }

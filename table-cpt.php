@@ -3,10 +3,15 @@
 if( !class_exists( 'WP_List_Table' ) )
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
+
 class HierarchyCPTTable extends WP_List_Table
 {
-
-    // constructor
+    /**
+     * Constructor
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function __construct()
     {
         global $status, $page;
@@ -19,56 +24,81 @@ class HierarchyCPTTable extends WP_List_Table
     }
 
 
-    // default column
+    /**
+     * Default column handler if there's no specific handler
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @param $column_name
+     * @return mixed
+     */
     function column_default( $item, $column_name )
     {
         switch( $column_name )
         {
             case 'title':
             case 'order':
-            case 'show_entries':
                 return $item[$column_name];
             default:
                 return print_r( $item, true ); // worst case, output for debugging
         }
     }
 
-    // defines our columns
+
+    /**
+     * Define the columns we plan on using
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
     function get_columns()
     {
         $columns = array(
             'title'         => 'Custom Post Type',
-            'show_entries'  => 'Show Entries',
             'order'         => 'Order'
         );
         return $columns;
     }
 
-    // title column
+
+    /**
+     * Handle the Title column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return
+     */
     function column_title( $item )
     {
         return $item['title'];
     }
 
 
+    /**
+     * Handle the Order column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return string
+     */
     function column_order( $item )
     {
         return '<input type="text" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" value="' . $item['order'] . '" class="small-text" />';
     }
 
 
-    function column_show_entries( $item )
-    {
-        $input = '<input type="checkbox" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][show_entries]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][show_entries]" value="1"';
-        if( $item['show_entries'] )
-            $input .= ' checked="checked"';
-        $input .= '/>';
-
-        return $input;
-    }
-
-
-    // prepare the data for display
+    /**
+     * Preps the data for display in the table
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param array $cpts
+     */
     function prepare_items( $cpts = array() )
     {
         // pagination
@@ -92,7 +122,14 @@ class HierarchyCPTTable extends WP_List_Table
         $this->items    = $data;
     }
 
-    // we're overwriting the default because we don't want the nonce...
+
+    /**
+     * Overwrite the default display() function because we don't want the nonce
+     * as it will interfere with our Settings page
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function display()
     { ?>
         <table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>" cellspacing="0">

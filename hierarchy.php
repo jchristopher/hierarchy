@@ -2,8 +2,8 @@
 /*
  Plugin Name: Hierarchy
  Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
- Description: Properly structure how you've set up your Pages, Posts, and Custom Post Types
- Version: 0.1
+ Description: Properly structure your Pages, Posts, and Custom Post Types
+ Version: 1.0
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
 */
@@ -30,7 +30,7 @@
 if( !defined( 'IS_ADMIN' ) )
     define( 'IS_ADMIN',  is_admin() );
 
-define( 'HIERARCHY_VERSION', '0.1' );
+define( 'HIERARCHY_VERSION', '1.0' );
 define( 'HIERARCHY_PREFIX', '_iti_hierarchy_' );
 define( 'HIERARCHY_DIR', WP_PLUGIN_DIR . '/' . basename( dirname( __FILE__ ) ) );
 define( 'HIERARCHY_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );
@@ -54,6 +54,13 @@ else
 
 }
 
+
+/**
+ * Initialize Hierarchy in the admin menu
+ *
+ * @package WordPress
+ * @author Jonathan Christopher
+ **/
 function iti_hierarchy_init()
 {
     $iti_hierarchy = new Hierarchy();
@@ -62,8 +69,8 @@ function iti_hierarchy_init()
 
 
 /**
- * Hierarncy
- * Properly structure how you've set up your Pages, Posts, and Custom Post Types
+ * Hierarchy
+ * Properly structure your Pages, Posts, and Custom Post Types
  *
  * @package WordPress
  * @author Jonathan Christopher
@@ -109,6 +116,12 @@ class Hierarchy
     }
 
 
+    /**
+     * Correctly position our Content menu entry and hide what should be hidden
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function hijack_admin_menu()
     {
         global $menu;
@@ -152,6 +165,14 @@ class Hierarchy
     }
 
 
+    /**
+     * Figure out how many levels deep a $post is
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $post
+     * @return int
+     */
     function get_pad_count( $post )
     {
         $level = 0;
@@ -175,12 +196,28 @@ class Hierarchy
     }
 
 
+    /**
+     * Produce our separator based on how many levels deep a $post is
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $post
+     * @return string
+     */
     function get_pad( $post )
     {
         return str_repeat( '&#8212; ', self::get_pad_count( $post ) );
     }
 
 
+    /**
+     * Pull the existing WordPress page post type
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
     function get_pages()
     {
         $args = array(
@@ -215,6 +252,14 @@ class Hierarchy
     }
 
 
+    /**
+     * Integrate CPT entries into the Page stack where appropriate
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
     function get_hierarchy()
     {
         global $wp_rewrite;
@@ -236,11 +281,14 @@ class Hierarchy
             $target_parent  = 0;        // safe to assume there's no parent
 
             // we'll always want to add the page to the Hierarchy
-            $hierarchy[] = array(
+            $new = array(
                     'entry'     => $pages[$i],
                     'order'     => $pages[$i]['order'],
                     'parent'    => $pages[$i]['parent']
                 );
+
+            // instead of appending, we need to inject
+            $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
 
             // we're going to loop through all of the CPTs WP knows about
             // because we might not have any settings for them
@@ -297,12 +345,15 @@ class Hierarchy
                         'order'     => $order
                     );
 
-                    // lastly we'll append our CPT and flag it as handled
-                    $hierarchy[] = array(
+
+                    $new = array(
                             'entry'     => $cpt,
                             'order'     => $order,
                             'parent'    => $target_parent
                         );
+
+                    // instead of appending, we need to inject
+                    $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
 
                     // we've added our CPT index entry, but we need to handle the CPT entries as well
                     // TODO: pull CPT entries for applicable CPT and output as rows
@@ -355,51 +406,58 @@ class Hierarchy
     }
 
 
+    /**
+     * Inject a new entry into the Hierarchy at the correct index
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param array $existing
+     * @param array $new
+     * @return array
+     */
     function inject_hierarchy_entry( $existing = array(), $new = array() )
     {
-        // note that $existing is already in order and we want to inject $new in the proper place on the proper level
+        // note that $existing is already in order (but not multi-dimensional) and we
+        // want to inject $new in the proper place on the proper level
 
-        if( $new['parent'] != 0 )
+        $order          = intval( $new['order'] );
+        $last_index     = 0;
+        $target_index   = -1;
+
+        // loop through and find out where we need to insert
+        for( $i = 0; $i < count( $existing ); $i++ )
         {
-            // loop through the existing Hierarchy until we find our parent
-        }
-        else
-        {
-            // it's a top level CPT so we just need to place it appropriately on level 1
-            $order = intval( $new['order'] );
-
-            $last_index     = 0;
-            $target_index   = -1;
-
-            for( $i = 0; $i < count( $existing ); $i++ )
+            if( isset( $existing[$i]['parent'] ) && $existing[$i]['parent'] == $new['parent'] )
             {
-                if( isset( $existing[$i]['parent'] ) && $existing[$i]['parent'] == 0 )
+                // we only want to proceed when we're working with the first level
+                $last_index = $i;
+                if( $order < intval( $existing[$i]['order'] ) )
                 {
-                    // we only want to proceed when we're working with the first level
-                    $last_index = $i;
-                    if( $order < intval( $existing[$i]['order'] ) )
-                    {
-                        // we've hit a ceiling
-                        $target_index = $last_index;
-                        break;
-                    }
+                    // we've hit a ceiling
+                    $target_index = $last_index;
+                    break;
                 }
             }
-
-            // we might be dealing with the last entry
-            if( $target_index === -1 )
-                $target_index = count( $existing );
-
-            // we'll insert our new entry in the appropriate place
-            array_splice( $existing, $target_index, 0, array( $new ) );
-
         }
+
+        // we might be dealing with the last entry
+        if( $target_index === -1 )
+            $target_index = count( $existing );
+
+        // we'll insert our new entry in the appropriate place
+        array_splice( $existing, $target_index, 0, array( $new ) );
 
         return $existing;
 
     }
 
 
+    /**
+     * Output the Hierarchy
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function show_hierarchy()
     {
         $table = new HierarchyTable();
@@ -420,24 +478,49 @@ class Hierarchy
     }
 
 
+    /**
+     * Housekeeping on the first run
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function first_run()
     {
         // nothing to do yet
     }
 
 
+    /**
+     * Implement our needed assets in the admin
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function assets()
     {
         // add options menu under Appearance
         add_submenu_page( 'themes.php', 'Hierarchy', 'Hierachy', 'manage_options', __FILE__, array( 'Hierarchy', 'admin_settings' ) );
     }
 
+
+    /**
+     * Callback for the Hierarchy settings
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function admin_settings()
     {
         include 'settings.php';
     }
 
 
+    /**
+     * Register our settings
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function register_settings()
     {
         // flag our settings
@@ -474,6 +557,14 @@ class Hierarchy
     }
 
 
+    /**
+     * Validate our settings
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $input
+     * @return array
+     */
     function validate_settings( $input )
     {
 
@@ -484,12 +575,24 @@ class Hierarchy
     }
 
 
+    /**
+     * Callback for the settings
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function edit_settings()
     {
 
     }
 
 
+    /**
+     * Display the available CPT settings
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function edit_cpt_placement()
     {
         $settings = get_option( HIERARCHY_PREFIX . 'settings' );
@@ -505,7 +608,6 @@ class Hierarchy
             $post_types[] = array(
                     'name'          => $post_type_name,
                     'title'         => $post_type->labels->name,
-                    'show_entries'  => isset( $settings['post_types'][$post_type_name]['show_entries'] ) ? true : false,
                     'order'         => $order
                 );
         }
@@ -527,21 +629,24 @@ class Hierarchy
         <div id="hierarchy-cpt-wrapper">
             <?php $table->display(); ?>
             <p>
-                <strong>Show Entries:</strong> when checked, the entries for the CPT will be included in the Hierarchy list
-                <br />
                 <strong>Order:</strong> customize the <code>menu_order</code> for the CPT
             </p>
         </div>
         <style type="text/css">
             #hierarchy-cpt-wrapper p { padding-top:5px; }
             #hierarchy-cpt-wrapper .tablenav { display:none; }
-            #hierarchy-cpt-wrapper .column-title { width:60%; }
-            #hierarchy-cpt-wrapper .column-show_entries { width:20%; }
+            #hierarchy-cpt-wrapper .column-title { width:80%; }
             #hierarchy-cpt-wrapper .column-order { width:20%; }
         </style>
     <?php }
 
 
+    /**
+     * List possible CPT entries to hide from the admin menu
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function edit_hidden_post_types()
     {
         // grab our existing settings
@@ -559,6 +664,14 @@ class Hierarchy
     }
 
 
+    /**
+     * Retrieve the registered post types from WP
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
     function get_post_types()
     {
         // grab all public post types
@@ -583,13 +696,13 @@ class Hierarchy
     function environment_check()
     {
         $wp_version = get_bloginfo( 'version' );
-        if( !version_compare( PHP_VERSION, '5.2', '>=' ) || !version_compare( $wp_version, '3.2', '>=' ) )
+        if( !version_compare( PHP_VERSION, '5.2', '>=' ) || !version_compare( $wp_version, '3.3', '>=' ) )
         {
             if( IS_ADMIN && ( !defined( 'DOING_AJAX' ) || !DOING_AJAX ) )
             {
                 require_once ABSPATH.'/wp-admin/includes/plugin.php';
                 deactivate_plugins( __FILE__ );
-                wp_die( __('Hierarchy requires PHP 5.2 or higher, as will WordPress 3.2 and higher. It has been automatically deactivated.') );
+                wp_die( __('Hierarchy requires PHP 5.2 or higher, as will WordPress 3.3 and higher. It has been automatically deactivated.') );
             }
             else
             {
@@ -597,7 +710,6 @@ class Hierarchy
             }
         }
     }
-
 
 
     /**
@@ -608,7 +720,7 @@ class Hierarchy
      */
     function l10n()
     {
-        load_plugin_textdomain( 'attachmentspro', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+        load_plugin_textdomain( 'hierarchy', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
     }
 
 

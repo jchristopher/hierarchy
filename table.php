@@ -5,8 +5,12 @@ if( !class_exists( 'WP_List_Table' ) )
 
 class HierarchyTable extends WP_List_Table
 {
-
-    // constructor
+    /**
+     * Constructor
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     **/
     function __construct()
     {
         global $status, $page;
@@ -19,7 +23,15 @@ class HierarchyTable extends WP_List_Table
     }
 
 
-    // default column
+    /**
+     * Default column handler if there's no specific handler
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @param $column_name
+     * @return mixed
+     */
     function column_default( $item, $column_name )
     {
         $item = $item['entry'];
@@ -36,30 +48,18 @@ class HierarchyTable extends WP_List_Table
         }
     }
 
-    // define our bulk actions
-    function get_bulk_actions()
-    {
-        $actions = array(
-            'delete'    => 'Delete'
-        );
-        return $actions;
-    }
 
-    // bulk action handler
-    function process_bulk_action()
-    {
-        // Detect when a bulk action is being triggered...
-        if( 'delete' === $this->current_action() )
-        {
-            wp_die( 'Items deleted (or they would be if we had items to delete)!' );
-        }
-    }
-
-    // defines our columns
+    /**
+     * Define the columns we plan on using
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
     function get_columns()
     {
         $columns = array(
-            'cb'        => '<input type="checkbox" />', // Render a checkbox instead of text
             'title'     => 'Title',
             'author'    => 'Author',
             'comments'  => '<span><span class="vers"><img src="' . get_admin_url() . 'images/comment-grey-bubble.png" alt="Comments" /></span></span>',
@@ -68,19 +68,15 @@ class HierarchyTable extends WP_List_Table
         return $columns;
     }
 
-    // checkbox column
-    function column_cb( $item )
-    {
-        $item = $item['entry'];
 
-        return sprintf(
-            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
-            /*$1%s*/ $this->_args['singular'],  // Let's simply repurpose the table's singular label ("movie")
-            /*$2%s*/ $item['ID']                // The value of the checkbox should be the record's id
-        );
-    }
-
-    // title column
+    /**
+     * Handle the Title column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return
+     */
     function column_title( $item )
     {
         // build row actions
@@ -128,10 +124,19 @@ class HierarchyTable extends WP_List_Table
 
         }
 
-        // Return the title contents
+        // return the title contents
         return '<strong><a class="row-title" href="' . $edit_url . '">' . $title . '</a></strong>' . $this->row_actions( $actions );
     }
 
+
+    /**
+     * Handle the Comments column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return string
+     */
     function column_comments( $item )
     {
         $item = $item['entry'];
@@ -140,11 +145,17 @@ class HierarchyTable extends WP_List_Table
     }
 
 
-    // prepare the data for display
+    /**
+     * Preps the data for display in the table
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param array $cpts
+     */
     function prepare_items( $hierarchy = null )
     {
         // pagination
-        $per_page   = 100;
+        $per_page   = -1;       // disable pagination for now
 
         // define our column headers
         $columns                = $this->get_columns();
@@ -152,13 +163,8 @@ class HierarchyTable extends WP_List_Table
         $sortable               = $this->get_sortable_columns();
         $this->_column_headers  = array($columns, $hidden, $sortable); // actually set the data
 
-        // handle our bulk action if we need to
-        $this->process_bulk_action();
-
         // define our data to be shown
         $data = $hierarchy;
-
-        // HERE IS WHERE THE QUERY GOES
 
         // find out what page we're currently on and get pagination set up
         $current_page   = $this->get_pagenum();

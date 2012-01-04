@@ -4,6 +4,13 @@ if( !class_exists( 'WP_List_Table' ) )
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
 
+/**
+ * HierarchyCPTTable
+ * Display registered Custom Post Types in a WP_List_table
+ *
+ * @package WordPress
+ * @author Jonathan Christopher
+ **/
 class HierarchyCPTTable extends WP_List_Table
 {
     /**
@@ -101,9 +108,6 @@ class HierarchyCPTTable extends WP_List_Table
      */
     function prepare_items( $cpts = array() )
     {
-        // pagination
-        $per_page   = 10000;
-
         // define our column headers
         $columns                = $this->get_columns();
         $hidden                 = array();
@@ -112,11 +116,6 @@ class HierarchyCPTTable extends WP_List_Table
 
         // define our data to be shown
         $data = $cpts;
-
-        $current_page   = $this->get_pagenum();
-
-        // the class doesn't handle pagination, so we need to trim the data to only the page we're viewing
-        $data           = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
 
         // our data has been prepped (i.e. sorted) and we can now use it
         $this->items    = $data;

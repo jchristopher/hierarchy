@@ -218,10 +218,11 @@ class Hierarchy
      *
      * @return array
      */
-    function get_pages()
+    function get_pages( $post_type = 'page' )
     {
         $args = array(
-            'sort_column'   => 'menu_order, post_title'
+            'sort_column'   => 'menu_order, post_title',
+            'post_type'     => $post_type
         );
         $base = get_pages( $args );
 
@@ -275,6 +276,8 @@ class Hierarchy
         // store our post types
         $post_types = $this->get_post_types();
 
+        $posts_page = ( 'page' == get_option( 'show_on_front' ) ) ? intval( get_option( 'page_for_posts' ) ) : false;
+
         // loop through the pages because we're building our tree one link at a time
         for( $i = 0; $i < count( $pages ); $i++ )
         {
@@ -288,13 +291,19 @@ class Hierarchy
                 );
 
             // instead of appending, we need to inject
-            $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
+            // but only if we're not dealing with an alternate Posts Page
+            if( !$posts_page || ( $posts_page != $pages[$i]['ID'] ) )
+            {
+                $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
+            }
 
             // we're going to loop through all of the CPTs WP knows about
             // because we might not have any settings for them
             // if the settings have not been re-saved
             foreach( $post_types as $post_type )
             {
+                $the_post_type = $post_type;
+
                 if( isset( $post_type->name ) )
                 {
                     $post_type = $post_type->name;
@@ -335,15 +344,18 @@ class Hierarchy
                 if( $pages[$i]['ID'] == $target_parent )
                 {
                     // we do have an applicable parent, let's build in our CPT entry
+
+                    $base_pad = Hierarchy::get_pad( get_page( $target_parent ) ) . '&#8212; ';
+
                     $cpt = array(
-                        'ID'        => $post_type,
-                        'pad'       => Hierarchy::get_pad( get_page( $target_parent ) ) . '&#8212; ',
-                        'title'     => $post_type,
-                        'author'    => '',
-                        'comments'  => '&ndash;',
-                        'date'      => '',
-                        'order'     => $order
-                    );
+                            'ID'        => $post_type,
+                            'pad'       => $base_pad,
+                            'title'     => $post_type,
+                            'author'    => '',
+                            'comments'  => '&ndash;',
+                            'date'      => '',
+                            'order'     => $order
+                        );
 
 
                     $new = array(
@@ -356,11 +368,38 @@ class Hierarchy
                     $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
 
                     // we've added our CPT index entry, but we need to handle the CPT entries as well
-                    // TODO: pull CPT entries for applicable CPT and output as rows
+                    if( $the_post_type->hierarchical && true == false ) // TODO: injection fails
+                    {
+                        $cpt_pages = $this->get_pages( $post_type );
 
-                    // TODO: test integration with 'page' style CTPs and parent levels therein
+                        if( !empty( $cpt_pages ) )
+                        {
+                            foreach( $cpt_pages as $cpt_page_ref )
+                            {
+                                $cpt_page = get_post( $cpt_page_ref['ID'] );
 
-                    // TODO: determine the best way to integrate taxonomies
+                                $new_cpt = array(
+                                        'ID'        => $cpt_page->ID,
+                                        'pad'       => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ',
+                                        'title'     => '! ' . $cpt_page->post_title,
+                                        'author'    => $cpt_page->post_author,
+                                        'comments'  => $cpt_page->comment_count,
+                                        'date'      => date( get_option( 'date_format' ), strtotime( $cpt_page->post_date ) ),
+                                        'order'     => $cpt_page->menu_order,
+                                        'parent'    => $cpt_page->post_parent
+                                    );
+
+                                $new_entry = array(
+                                        'entry'     => $new_cpt,
+                                        'order'     => $cpt_page->menu_order,
+                                        'parent'    => $cpt_page->post_parent
+                                    );
+
+                                // we'll go ahead and inject our entry
+                                $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new_entry );
+                            }
+                        }
+                    }
 
                     // we'll never need this again so we'll remove it because we're going to dump out the leftovers at the end
                     unset( $post_types[$post_type] );
@@ -415,10 +454,11 @@ class Hierarchy
      * @param array $new
      * @return array
      */
-    function inject_hierarchy_entry( $existing = array(), $new = array() )
+    function inject_hierarchy_entry( $existing = array(), $new = array(), $post_type = null )
     {
         // note that $existing is already in order (but not multi-dimensional) and we
         // want to inject $new in the proper place on the proper level
+
 
         $order          = intval( $new['order'] );
         $last_index     = 0;
@@ -429,13 +469,16 @@ class Hierarchy
         {
             if( isset( $existing[$i]['parent'] ) && $existing[$i]['parent'] == $new['parent'] )
             {
-                // we only want to proceed when we're working with the first level
-                $last_index = $i;
-                if( $order < intval( $existing[$i]['order'] ) )
+                if( !isset( $post_type ) || ( isset( $post_type ) && $existing[$i]['entry']['ID'] == $post_type ) )
                 {
-                    // we've hit a ceiling
-                    $target_index = $last_index;
-                    break;
+                    // we only want to proceed when we're working with the first level
+                    $last_index = $i;
+                    if( $order < intval( $existing[$i]['order'] ) )
+                    {
+                        // we've hit a ceiling
+                        $target_index = $last_index;
+                        break;
+                    }
                 }
             }
         }
@@ -622,7 +665,7 @@ class Hierarchy
         }
 
         // prepare our data
-        $table->prepare_items( $post_types, self::get_pages() );
+        $table->prepare_items( $post_types );
 
         // output the table
         ?>
@@ -684,6 +727,29 @@ class Hierarchy
         $post_types = get_post_types( $args, $output, $operator );
 
         return $post_types;
+    }
+
+
+    /**
+     * Retrieve the registered taxonomies from WP for a specific post type
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
+    function get_taxonomies_for_post_type( $post_type )
+    {
+        // grab all public taxonomies
+        $args       = array(
+                'public'        => true,
+                'object_type'   => array( $post_type )
+            );
+        $output     = 'objects';
+        $operator   = 'and';
+        $taxonomies = get_taxonomies( $args, $output, $operator );
+
+        return $taxonomies;
     }
 
 

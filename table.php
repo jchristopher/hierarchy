@@ -3,6 +3,14 @@
 if( !class_exists( 'WP_List_Table' ) )
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
+
+/**
+ * HierarchyTable
+ * Display Hierarchy in a WP_List_table
+ *
+ * @package WordPress
+ * @author Jonathan Christopher
+ **/
 class HierarchyTable extends WP_List_Table
 {
     /**
@@ -93,7 +101,7 @@ class HierarchyTable extends WP_List_Table
             $edit_url = get_admin_url() . 'post.php?post=' . $item['ID'] . '&action=edit';
 
             $actions['edit'] = '<a href="' . $edit_url . '">Edit</a>';
-            $actions['view'] = '<a href="/?page_id=' . $item['ID'] . '">View</a>';
+            $actions['view'] = '<span class="view"><a href="' . get_bloginfo( 'url' ) . '/?page_id=' . $item['ID'] . '" rel="permalink">View</a></span>';
         }
         else
         {
@@ -111,17 +119,51 @@ class HierarchyTable extends WP_List_Table
 
             $title = $item['pad'] . $cpt->labels->name;
 
+            $posts_page = ( 'page' == get_option( 'show_on_front' ) ) ? intval( get_option( 'page_for_posts' ) ) : false;
+
+            if( $cpt->name == 'post' && $posts_page )
+            {
+                $title = $item['pad'] . get_the_title( $posts_page );
+            }
+
             $edit_url = get_admin_url() . 'edit.php?post_type=' . $cpt->name;
 
             $actions['edit'] = '<a href="' . $edit_url . '">Edit</a>';
 
             // let's check to see if we in fact have a CPT archive to use for the View link
-            if( $cpt->has_archive )
-                $actions['view'] = '<a href="' . get_post_type_archive_link( $cpt->name ) . '">View</a>';
+            if( $cpt->has_archive || $cpt->name == 'post' && $posts_page )
+            {
+                if( $cpt->name == 'post' && $posts_page )
+                {
+                    $actions['view'] = '<a href="' . get_permalink( $posts_page) . '">View</a>';
+                }
+                else
+                {
+                    $actions['view'] = '<a href="' . get_post_type_archive_link( $cpt->name ) . '">View</a>';
+                }
+            }
 
             $add_url = get_admin_url() . 'post-new.php?post_type=' . $cpt->name;
             $actions['add'] = '<a href="' . $add_url . '">Add New</a>';
 
+            // let's see if we need to add any taxonomies
+            $taxonomies = Hierarchy::get_taxonomies_for_post_type( $cpt->name );
+
+            if( !empty( $taxonomies ) )
+            {
+                foreach( $taxonomies as $taxonomy )
+                {
+                    if( $taxonomy->name != 'post_format' )
+                    {
+                        $tax_edit_url = get_admin_url() . 'edit-tags.php?taxonomy=' . $taxonomy->name;
+                        if( $cpt->name != 'post' )
+                        {
+                            $tax_edit_url .= '&post_type=' . $cpt->name;
+                        }
+                        $actions['tax_' . $taxonomy->name] = '<a href="' . $tax_edit_url . '">' . $taxonomy->labels->name . '</a>';
+                    }
+                }
+            }
         }
 
         // return the title contents

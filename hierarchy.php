@@ -132,7 +132,7 @@ class Hierarchy
             $position++;
 
         // add our menu item
-        add_menu_page( "Content", "Content", "edit_posts", "hierarchy", array( $this, "show_hierarchy" ), null, $position );
+        add_menu_page( __( "Content", "hierarchy" ), __( "Content", "hierarchy" ), "edit_posts", "hierarchy", array( $this, "show_hierarchy" ), HIERARCHY_URL . '/images/icon-hierarchy-menu.png', $position );
 
         // do we need to remove any menu entries?
         if( is_array( $this->post_types ) )
@@ -529,7 +529,7 @@ class Hierarchy
         ?>
         <div class="wrap">
             <div id="icon-page" class="icon32"><br/></div>
-            <h2>Content</h2>
+            <h2><?php echo _e( "Content", "hierarchy" ); ?></h2>
 
             <div id="iti-hierarchy-wrapper">
                 <form id="iti-hierarchy-form" method="get">
@@ -568,7 +568,7 @@ class Hierarchy
     function assets()
     {
         // add options menu under Appearance
-        add_submenu_page( 'themes.php', 'Hierarchy', 'Hierachy', 'manage_options', __FILE__, array( 'Hierarchy', 'admin_settings' ) );
+        add_options_page( 'Hierarchy', 'Hierachy', 'manage_options', __FILE__, array( 'Hierarchy', 'admin_settings' ) );
     }
 
 
@@ -701,7 +701,7 @@ class Hierarchy
                 <strong>Order:</strong> customize the <code>menu_order</code> for the CPT
             </p>
         </div>
-        -> type="text/css">
+        <style type="text/css">
             #hierarchy-cpt-wrapper p { padding-top:5px; }
             #hierarchy-cpt-wrapper .tablenav { display:none; }
             #hierarchy-cpt-wrapper .column-title { width:80%; }

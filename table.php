@@ -242,7 +242,7 @@ class HierarchyTable extends WP_List_Table
 
         if( is_numeric( $item['ID'] ) ) // only if applicable
         {
-            $column = '<div class="post-com-count-wrapper"><a href="#" class="post-com-count"><span class="comment-count">' . $item['comments'] . '</span></a></div>';
+            $column = '<div class="post-com-count-wrapper"><a class="post-com-count" style="cursor:default;"><span class="comment-count">' . $item['comments'] . '</span></a></div>';
         }
 
         return $column;

@@ -1,22 +1,21 @@
 === Hierarchy ===
 Contributors: jchristopher
 Donate link: http://mondaybynoon.com/donate/
-Tags: hierarchy, structure, pages, cpt, custom post types, url, routing
+Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.3
 Tested up to: 3.3.1
-Stable tag: 1.0
+Stable tag: 0.1
 
 Properly structure your Pages, Posts, and Custom Post Types
 
 == Description ==
 
-Description coming soon
+Hierarchy allows you to contextually include your Custom Post Types within your Pages. Please see [the introduction](http://jchr.co/rv).
 
 == Installation ==
 
 1. Upload Hierarchy to your `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Enjoy
 
 == Frequently Asked Questions ==
 
@@ -34,7 +33,7 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 
 == Changelog ==
 
-= 1.0 =
+= 0.1 =
 * Initial release
 
 == Roadmap ==

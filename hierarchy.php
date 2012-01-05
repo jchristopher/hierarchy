@@ -3,7 +3,7 @@
  Plugin Name: Hierarchy
  Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 1.0
+ Version: 0.1
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
 */
@@ -30,7 +30,7 @@
 if( !defined( 'IS_ADMIN' ) )
     define( 'IS_ADMIN',  is_admin() );
 
-define( 'HIERARCHY_VERSION', '1.0' );
+define( 'HIERARCHY_VERSION', '0.1' );
 define( 'HIERARCHY_PREFIX', '_iti_hierarchy_' );
 define( 'HIERARCHY_DIR', WP_PLUGIN_DIR . '/' . basename( dirname( __FILE__ ) ) );
 define( 'HIERARCHY_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );
@@ -287,7 +287,8 @@ class Hierarchy
             $new = array(
                     'entry'     => $pages[$i],
                     'order'     => $pages[$i]['order'],
-                    'parent'    => $pages[$i]['parent']
+                    'parent'    => $pages[$i]['parent'],
+                    'post_type' => 'page'
                 );
 
             // instead of appending, we need to inject
@@ -349,10 +350,11 @@ class Hierarchy
 
                     $cpt = array(
                             'ID'        => $post_type,
+                            'post_type' => $post_type,
                             'pad'       => $base_pad,
                             'title'     => $post_type,
                             'author'    => '',
-                            'comments'  => '&ndash;',
+                            'comments'  => '',
                             'date'      => '',
                             'order'     => $order
                         );
@@ -361,6 +363,7 @@ class Hierarchy
                     $new = array(
                             'entry'     => $cpt,
                             'order'     => $order,
+                            'post_type' => $post_type,
                             'parent'    => $target_parent
                         );
 
@@ -368,35 +371,51 @@ class Hierarchy
                     $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
 
                     // we've added our CPT index entry, but we need to handle the CPT entries as well
-                    if( $the_post_type->hierarchical && true == false ) // TODO: injection fails
+                    if( $the_post_type->hierarchical ) // TODO: injection fails
                     {
                         $cpt_pages = $this->get_pages( $post_type );
 
                         if( !empty( $cpt_pages ) )
                         {
+                            $cpt_page_hierarchy = array();
                             foreach( $cpt_pages as $cpt_page_ref )
                             {
-                                $cpt_page = get_post( $cpt_page_ref['ID'] );
+                                $cpt_page   = get_post( $cpt_page_ref['ID'] );
+
+                                // grab our author info
+                                $author     = get_userdata( $cpt_page->post_author );
 
                                 $new_cpt = array(
                                         'ID'        => $cpt_page->ID,
                                         'pad'       => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ',
-                                        'title'     => '! ' . $cpt_page->post_title,
-                                        'author'    => $cpt_page->post_author,
+                                        'title'     => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ' . $cpt_page->post_title,
+                                        'author'    => $author->display_name,
                                         'comments'  => $cpt_page->comment_count,
                                         'date'      => date( get_option( 'date_format' ), strtotime( $cpt_page->post_date ) ),
                                         'order'     => $cpt_page->menu_order,
-                                        'parent'    => $cpt_page->post_parent
+                                        'parent'    => ( $cpt_page->post_parent != 0 ) ? $cpt_page->post_parent : $post_type,
+                                        'post_type' => $cpt_page->post_type
                                     );
 
                                 $new_entry = array(
                                         'entry'     => $new_cpt,
                                         'order'     => $cpt_page->menu_order,
-                                        'parent'    => $cpt_page->post_parent
+                                        'parent'    => ( $cpt_page->post_parent != 0 ) ? $cpt_page->post_parent : $post_type,
+                                        'post_type' => $cpt_page->post_type
                                     );
 
-                                // we'll go ahead and inject our entry
-                                $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new_entry );
+                                // we'll go ahead and append our entry because it's already in order
+                                $cpt_page_hierarchy[] = $new_entry;
+                            }
+
+                            // append the CPT entry hierarchy to the main hierarchy since it's already in order and properly padded
+                            if( is_array( $cpt_page_hierarchy ) )
+                            {
+                                foreach( $cpt_page_hierarchy as $cpt_entry )
+                                {
+                                    $hierarchy[] = $cpt_entry;
+                                }
+                                unset( $cpt_page_hierarchy );
                             }
                         }
                     }
@@ -426,12 +445,14 @@ class Hierarchy
                         'author'        => '',
                         'comments'      => '&ndash;',
                         'date'          => '',
-                        'order'         => $order
+                        'order'         => $order,
+                        'post_type'     => $post_type->name
                     );
 
                     $new = array(
                             'entry'     => $cpt,
                             'order'     => $order,
+                            'post_type' => $post_type->name,
                             'parent'    => 0
                         );
 
@@ -459,7 +480,6 @@ class Hierarchy
         // note that $existing is already in order (but not multi-dimensional) and we
         // want to inject $new in the proper place on the proper level
 
-
         $order          = intval( $new['order'] );
         $last_index     = 0;
         $target_index   = -1;
@@ -469,7 +489,7 @@ class Hierarchy
         {
             if( isset( $existing[$i]['parent'] ) && $existing[$i]['parent'] == $new['parent'] )
             {
-                if( !isset( $post_type ) || ( isset( $post_type ) && $existing[$i]['entry']['ID'] == $post_type ) )
+                if( $existing[$i]['post_type'] == 'page' )  // otherwise we might inject within CTP entries
                 {
                     // we only want to proceed when we're working with the first level
                     $last_index = $i;
@@ -511,10 +531,16 @@ class Hierarchy
             <div id="icon-page" class="icon32"><br/></div>
             <h2>Content</h2>
 
-            <form id="iti-hierarchy-filter" method="get">
-                <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
-                <?php $table->display() ?>
-            </form>
+            <div id="iti-hierarchy-wrapper">
+                <form id="iti-hierarchy-form" method="get">
+                    <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+                    <?php $table->display() ?>
+                </form>
+            </div>
+
+            <style type="text/css">
+                #iti-hierarchy-wrapper .column-icon { width:38px; }
+            </style>
 
         </div>
     <?php
@@ -675,7 +701,7 @@ class Hierarchy
                 <strong>Order:</strong> customize the <code>menu_order</code> for the CPT
             </p>
         </div>
-        <style type="text/css">
+        -> type="text/css">
             #hierarchy-cpt-wrapper p { padding-top:5px; }
             #hierarchy-cpt-wrapper .tablenav { display:none; }
             #hierarchy-cpt-wrapper .column-title { width:80%; }

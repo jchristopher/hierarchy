@@ -50,6 +50,7 @@ class HierarchyTable extends WP_List_Table
             case 'author':
             case 'comments':
             case 'date':
+            case 'icon':
                 return $item[$column_name];
             default:
                 return print_r( $item, true ); // worst case, output for debugging
@@ -68,12 +69,63 @@ class HierarchyTable extends WP_List_Table
     function get_columns()
     {
         $columns = array(
+            'icon'      => '',
             'title'     => 'Title',
             'author'    => 'Author',
             'comments'  => '<span><span class="vers"><img src="' . get_admin_url() . 'images/comment-grey-bubble.png" alt="Comments" /></span></span>',
             'date'      => 'Date'
         );
         return $columns;
+    }
+
+
+    /**
+     * Handle the Icon column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return
+     */
+    function column_icon( $item )
+    {
+        $icon = '';
+
+        if( isset( $item['post_type'] ) )
+        {
+            $post_type = get_post_type_object( $item['post_type'] );
+
+            // if we have a hierarchical post_type we'll want to use the Page icon instead of the Post icon
+            if( $post_type->hierarchical )
+                $item['post_type'] = 'page';
+
+            if( !empty( $post_type->menu_icon ) )
+            {
+                // we'll use the user-defined menu_icon if possible
+                $icon = $post_type->menu_icon;
+            }
+            else
+            {
+                switch( $item['post_type'] )
+                {
+                    case 'page':
+                        $icon = 'icon-page.png';
+                        break;
+
+                    case 'post':
+                        $icon = 'icon-post.png';
+                        break;
+
+                    default: // custom post type
+                        $icon = 'icon-post.png';
+                        break;
+                }
+
+                $icon = HIERARCHY_URL . '/images/' . $icon;
+            }
+        }
+
+        return '<img src="' . $icon . '" alt="Post icon" />';
     }
 
 
@@ -121,10 +173,13 @@ class HierarchyTable extends WP_List_Table
 
             $posts_page = ( 'page' == get_option( 'show_on_front' ) ) ? intval( get_option( 'page_for_posts' ) ) : false;
 
+            // set the Posts label to be the posts page Title
             if( $cpt->name == 'post' && !empty( $posts_page ) )
             {
                 $title = $item['pad'] . get_the_title( $posts_page );
             }
+
+            $title .= ' &raquo;';
 
             $edit_url = get_admin_url() . 'edit.php?post_type=' . $cpt->name;
 
@@ -183,7 +238,14 @@ class HierarchyTable extends WP_List_Table
     {
         $item = $item['entry'];
 
-        return '<div class="post-com-count-wrapper"><a href="#" class="post-com-count"><span class="comment-count">' . $item['comments'] . '</span></a></div>';
+        $column = '';
+
+        if( is_numeric( $item['ID'] ) ) // only if applicable
+        {
+            $column = '<div class="post-com-count-wrapper"><a href="#" class="post-com-count"><span class="comment-count">' . $item['comments'] . '</span></a></div>';
+        }
+
+        return $column;
     }
 
 
@@ -197,7 +259,7 @@ class HierarchyTable extends WP_List_Table
     function prepare_items( $hierarchy = null )
     {
         // pagination
-        $per_page   = -1;       // disable pagination for now
+        $per_page   = 100; // TODO: make this a setting
 
         // define our column headers
         $columns                = $this->get_columns();

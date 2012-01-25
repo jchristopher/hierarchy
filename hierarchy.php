@@ -281,9 +281,7 @@ class Hierarchy
         // loop through the pages because we're building our tree one link at a time
         for( $i = 0; $i < count( $pages ); $i++ )
         {
-            $target_parent  = 0;        // safe to assume there's no parent
-
-            // we'll always want to add the page to the Hierarchy
+            // we'll always want to add the entry to the Hierarchy
             $new = array(
                     'entry'     => $pages[$i],
                     'order'     => $pages[$i]['order'],
@@ -303,6 +301,8 @@ class Hierarchy
             // if the settings have not been re-saved
             foreach( $post_types as $post_type )
             {
+                $target_parent  = 0;        // safe to assume there's no parent
+
                 $the_post_type = $post_type;
 
                 if( isset( $post_type->name ) )
@@ -318,13 +318,24 @@ class Hierarchy
 
                 // we can only figure out the parent if WordPress knows about the archive slug
                 if( isset( $wp_rewrite->extra_permastructs[$post_type] )
-                    && $wp_rewrite->extra_permastructs[$post_type][1] ) // make sure rewrite is enabled
+                    && $wp_rewrite->extra_permastructs[$post_type][1] === 1 ) // make sure rewrite is enabled
                 {
+
                     // we have a permalink structure for the CPT at hand...
                     $cpt_archive_slug = $wp_rewrite->extra_permastructs[$post_type][0];
 
                     // let's break it up into URI segments
-                    $cpt_archive_slug = explode( '/', $cpt_archive_slug );
+                    $cpt_archive_slug = explode( '/', trim( $cpt_archive_slug ) );
+
+                    // let's remove empty values
+                    if( count( $cpt_archive_slug ) )
+                    {
+                        for( $f = 0; $f < count( $cpt_archive_slug ); $f++ )
+                        {
+                            if( empty( $cpt_archive_slug[$f] ) )
+                                unset( $cpt_archive_slug[$f] );
+                        }
+                    }
 
                     // the last two segments represent the CPT archive and the slug, so we need everything before that
 
@@ -342,11 +353,27 @@ class Hierarchy
                     }
                 }
 
+                // edge case: user has customized the front of the permalink
+                if( !empty( $wp_rewrite->front ) && $posts_page && $posts_page == $pages[$i]['ID'] && $post_type == 'post' )
+                {
+                    // we're working with posts a customized permalink structure
+                    // which will interfere with the placement of this entry, we need to find our new parent
+
+                    // we've got the right padding, we just have the wrong parent
+                    $target_parent = $posts_page;
+                }
+
                 if( $pages[$i]['ID'] == $target_parent )
                 {
                     // we do have an applicable parent, let's build in our CPT entry
+                    $pad = '&#8212; ';
 
-                    $base_pad = Hierarchy::get_pad( get_page( $target_parent ) ) . '&#8212; ';
+                    // continuing with our edge case considering a customized front on the permalink structure
+                    // in conjunction with a Posts Page, we might end up with an extra padding level
+                    if( !empty( $wp_rewrite->front ) && $posts_page && $posts_page == $pages[$i]['ID'] && $post_type == 'post' )
+                        $pad = '';
+
+                    $base_pad = Hierarchy::get_pad( get_page( $target_parent ) ) . $pad;
 
                     $cpt = array(
                             'ID'        => $post_type,

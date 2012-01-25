@@ -38,6 +38,7 @@ define( 'HIERARCHY_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );
 // WordPress actions
 if( IS_ADMIN )
 {
+    // TODO: we only need these within the proper function, not all the time
     require_once HIERARCHY_DIR . '/table.php';      // handles the actual Hierarchy display
     require_once HIERARCHY_DIR . '/table-cpt.php';  // handles the CPT listing on the Settings page
 
@@ -356,11 +357,27 @@ class Hierarchy
                 // edge case: user has customized the front of the permalink
                 if( !empty( $wp_rewrite->front ) && $posts_page && $posts_page == $pages[$i]['ID'] && $post_type == 'post' )
                 {
-                    // we're working with posts a customized permalink structure
+                    // we're working with posts & a customized permalink structure
                     // which will interfere with the placement of this entry, we need to find our new parent
 
                     // we've got the right padding, we just have the wrong parent
                     $target_parent = $posts_page;
+                }
+
+                // what if there is a CPT that wants to use a Page as it's archive?
+                // for example a Page has the same slug as a CPT rewrite slug (AND has no archive)
+                if( !empty( $the_post_type->rewrite['slug'] ) && !$the_post_type->has_archive )
+                {
+                    $faux_parent        = get_page_by_path( $the_post_type->rewrite['slug'] );
+                    $faux_parent_id     = $faux_parent->ID;
+                    $faux_archive       = get_permalink( $faux_parent_id );
+
+                    // does our CPT archive slug match an existing Page?
+                    if( !empty( $faux_archive ) )
+                    {
+                        // let's set the right parent
+                        $target_parent = $faux_parent_id;
+                    }
                 }
 
                 if( $pages[$i]['ID'] == $target_parent )
@@ -398,7 +415,7 @@ class Hierarchy
                     $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
 
                     // we've added our CPT index entry, but we need to handle the CPT entries as well
-                    if( $the_post_type->hierarchical ) // TODO: injection fails
+                    if( $the_post_type->hierarchical )
                     {
                         $cpt_pages = $this->get_pages( $post_type );
 

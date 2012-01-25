@@ -46,6 +46,8 @@ class HierarchyCPTTable extends WP_List_Table
         {
             case 'title':
             case 'order':
+            case 'omit':
+            case 'entries':
                 return $item[$column_name];
             default:
                 return print_r( $item, true ); // worst case, output for debugging
@@ -65,7 +67,9 @@ class HierarchyCPTTable extends WP_List_Table
     {
         $columns = array(
             'title'         => 'Custom Post Type',
-            'order'         => 'Order'
+            'entries'       => 'Show Entries',
+            'omit'          => 'Omit',
+            'order'         => 'Order',
         );
         return $columns;
     }
@@ -96,6 +100,36 @@ class HierarchyCPTTable extends WP_List_Table
     function column_order( $item )
     {
         return '<input type="text" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" value="' . $item['order'] . '" class="small-text" />';
+    }
+
+
+    /**
+     * Handle the Omit column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return
+     */
+    function column_omit( $item )
+    {
+        $checked = $item['omit'] ? ' checked="checked"' : '';
+        return '<input type="checkbox" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][omit]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][omit]" value="1"' . $checked . ' />';
+    }
+
+
+    /**
+     * Handle the Entries column
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     * @param $item
+     * @return
+     */
+    function column_entries( $item )
+    {
+        $checked = $item['entries'] ? ' checked="checked"' : '';
+        return '<input type="checkbox" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][entries]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][entries]" value="1"' . $checked . ' />';
     }
 
 

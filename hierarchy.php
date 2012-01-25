@@ -229,25 +229,75 @@ class Hierarchy
 
         $pages = array();
 
-        foreach( $base as $page )
+        if( !empty( $base ) )
         {
+            foreach( $base as $page )
+            {
 
-            // get the author information
-            $author = get_userdata( $page->post_author );
+                // get the author information
+                $author = get_userdata( $page->post_author );
 
-            // get the pad (if necessary)
-            $title = self::get_pad( $page ) . $page->post_title;
+                // get the pad (if necessary)
+                $title = self::get_pad( $page ) . $page->post_title;
 
-            $pages[] = array(
-                    'ID'        => $page->ID,
-                    'post_type' => $page->post_type,
-                    'title'     => $title,
-                    'author'    => $author->display_name,
-                    'comments'  => $page->comment_count,
-                    'date'      => date( get_option( 'date_format' ), strtotime( $page->post_date ) ),
-                    'order'     => $page->menu_order,
-                    'parent'    => $page->post_parent
-                );
+                $pages[] = array(
+                        'ID'        => $page->ID,
+                        'post_type' => $page->post_type,
+                        'title'     => $title,
+                        'author'    => $author->display_name,
+                        'comments'  => $page->comment_count,
+                        'date'      => date( get_option( 'date_format' ), strtotime( $page->post_date ) ),
+                        'order'     => $page->menu_order,
+                        'parent'    => $page->post_parent
+                    );
+            }
+        }
+
+        return $pages;
+    }
+
+
+    /**
+     * Pull the existing posts for a Custom Post Type
+     *
+     * @package WordPress
+     * @author Jonathan Christopher
+     *
+     * @return array
+     */
+    function get_posts( $post_type = 'post' )
+    {
+        // TODO: This thing is SUPER redundant, need to figure out how to merge this and get_pages
+
+        $args = array(
+            'post_type'     => $post_type,
+            'numberposts'   => -1
+        );
+        $base = get_posts( $args );
+
+        $pages = array();
+
+        if( !empty( $base ) )
+        {
+            foreach( $base as $page )
+            {
+                // get the author information
+                $author = get_userdata( $page->post_author );
+
+                // get the pad (if necessary)
+                $title = self::get_pad( $page ) . $page->post_title;
+
+                $pages[] = array(
+                        'ID'        => $page->ID,
+                        'post_type' => $page->post_type,
+                        'title'     => $title,
+                        'author'    => $author->display_name,
+                        'comments'  => $page->comment_count,
+                        'date'      => date( get_option( 'date_format' ), strtotime( $page->post_date ) ),
+                        'order'     => $page->menu_order,
+                        'parent'    => $page->post_parent
+                    );
+            }
         }
 
         return $pages;
@@ -302,170 +352,181 @@ class Hierarchy
             // if the settings have not been re-saved
             foreach( $post_types as $post_type )
             {
-                $target_parent  = 0;        // safe to assume there's no parent
-
-                $the_post_type = $post_type;
-
-                if( isset( $post_type->name ) )
+                // make sure we're not omitting this post type entirely as per the Settings
+                if( empty( $settings['post_types'][$post_type->name]['omit'] ) )
                 {
-                    $post_type = $post_type->name;
-                }
-                else
-                {
-                    $post_type = '';
-                }
+                    $target_parent  = 0;        // safe to assume there's no parent
 
-                $order = ( !empty( $settings['post_types'][$post_type]['order'] ) ) ? intval( $settings['post_types'][$post_type]['order'] ) : 0;
+                    $the_post_type = $post_type;
 
-                // we can only figure out the parent if WordPress knows about the archive slug
-                if( isset( $wp_rewrite->extra_permastructs[$post_type] )
-                    && $wp_rewrite->extra_permastructs[$post_type][1] === 1 ) // make sure rewrite is enabled
-                {
-
-                    // we have a permalink structure for the CPT at hand...
-                    $cpt_archive_slug = $wp_rewrite->extra_permastructs[$post_type][0];
-
-                    // let's break it up into URI segments
-                    $cpt_archive_slug = explode( '/', trim( $cpt_archive_slug ) );
-
-                    // let's remove empty values
-                    if( count( $cpt_archive_slug ) )
+                    if( isset( $post_type->name ) )
                     {
-                        for( $f = 0; $f < count( $cpt_archive_slug ); $f++ )
+                        $post_type = $post_type->name;
+                    }
+                    else
+                    {
+                        $post_type = '';
+                    }
+
+                    $order = ( !empty( $settings['post_types'][$post_type]['order'] ) ) ? intval( $settings['post_types'][$post_type]['order'] ) : 0;
+
+                    // we can only figure out the parent if WordPress knows about the archive slug
+                    if( isset( $wp_rewrite->extra_permastructs[$post_type] )
+                        && $wp_rewrite->extra_permastructs[$post_type][1] === 1 ) // make sure rewrite is enabled
+                    {
+
+                        // we have a permalink structure for the CPT at hand...
+                        $cpt_archive_slug = $wp_rewrite->extra_permastructs[$post_type][0];
+
+                        // let's break it up into URI segments
+                        $cpt_archive_slug = explode( '/', trim( $cpt_archive_slug ) );
+
+                        // let's remove empty values
+                        if( count( $cpt_archive_slug ) )
                         {
-                            if( empty( $cpt_archive_slug[$f] ) )
-                                unset( $cpt_archive_slug[$f] );
+                            for( $f = 0; $f < count( $cpt_archive_slug ); $f++ )
+                            {
+                                if( empty( $cpt_archive_slug[$f] ) )
+                                    unset( $cpt_archive_slug[$f] );
+                            }
+                        }
+
+                        // the last two segments represent the CPT archive and the slug, so we need everything before that
+
+                        // that said, if the array isn't at least 3 keys, there is no possible parent
+                        if( count( $cpt_archive_slug ) > 2 )
+                        {
+                            $parent_slug = implode( '/', array_slice( $cpt_archive_slug, 0, count( $cpt_archive_slug ) - 2 ) );
+
+                            // we have the parent's slug
+                            $parent_page = get_page_by_path( $parent_slug );
+
+                            // let's fetch the ID and be done with it
+                            if( isset( $parent_page->ID ) )     // this could be undefined if Permalinks have not been regenerated
+                                $target_parent = $parent_page->ID;
                         }
                     }
 
-                    // the last two segments represent the CPT archive and the slug, so we need everything before that
-
-                    // that said, if the array isn't at least 3 keys, there is no possible parent
-                    if( count( $cpt_archive_slug ) > 2 )
-                    {
-                        $parent_slug = implode( '/', array_slice( $cpt_archive_slug, 0, count( $cpt_archive_slug ) - 2 ) );
-
-                        // we have the parent's slug
-                        $parent_page = get_page_by_path( $parent_slug );
-
-                        // let's fetch the ID and be done with it
-                        if( isset( $parent_page->ID ) )     // this could be undefined if Permalinks have not been regenerated
-                            $target_parent = $parent_page->ID;
-                    }
-                }
-
-                // edge case: user has customized the front of the permalink
-                if( !empty( $wp_rewrite->front ) && $posts_page && $posts_page == $pages[$i]['ID'] && $post_type == 'post' )
-                {
-                    // we're working with posts & a customized permalink structure
-                    // which will interfere with the placement of this entry, we need to find our new parent
-
-                    // we've got the right padding, we just have the wrong parent
-                    $target_parent = $posts_page;
-                }
-
-                // what if there is a CPT that wants to use a Page as it's archive?
-                // for example a Page has the same slug as a CPT rewrite slug (AND has no archive)
-                if( !empty( $the_post_type->rewrite['slug'] ) && !$the_post_type->has_archive )
-                {
-                    $faux_parent        = get_page_by_path( $the_post_type->rewrite['slug'] );
-                    $faux_parent_id     = $faux_parent->ID;
-                    $faux_archive       = get_permalink( $faux_parent_id );
-
-                    // does our CPT archive slug match an existing Page?
-                    if( !empty( $faux_archive ) )
-                    {
-                        // let's set the right parent
-                        $target_parent = $faux_parent_id;
-                    }
-                }
-
-                if( $pages[$i]['ID'] == $target_parent )
-                {
-                    // we do have an applicable parent, let's build in our CPT entry
-                    $pad = '&#8212; ';
-
-                    // continuing with our edge case considering a customized front on the permalink structure
-                    // in conjunction with a Posts Page, we might end up with an extra padding level
+                    // edge case: user has customized the front of the permalink
                     if( !empty( $wp_rewrite->front ) && $posts_page && $posts_page == $pages[$i]['ID'] && $post_type == 'post' )
-                        $pad = '';
-
-                    $base_pad = Hierarchy::get_pad( get_page( $target_parent ) ) . $pad;
-
-                    $cpt = array(
-                            'ID'        => $post_type,
-                            'post_type' => $post_type,
-                            'pad'       => $base_pad,
-                            'title'     => $post_type,
-                            'author'    => '',
-                            'comments'  => '',
-                            'date'      => '',
-                            'order'     => $order
-                        );
-
-
-                    $new = array(
-                            'entry'     => $cpt,
-                            'order'     => $order,
-                            'post_type' => $post_type,
-                            'parent'    => $target_parent
-                        );
-
-                    // instead of appending, we need to inject
-                    $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
-
-                    // we've added our CPT index entry, but we need to handle the CPT entries as well
-                    if( $the_post_type->hierarchical )
                     {
-                        $cpt_pages = $this->get_pages( $post_type );
+                        // we're working with posts & a customized permalink structure
+                        // which will interfere with the placement of this entry, we need to find our new parent
 
-                        if( !empty( $cpt_pages ) )
+                        // we've got the right padding, we just have the wrong parent
+                        $target_parent = $posts_page;
+                    }
+
+                    // what if there is a CPT that wants to use a Page as it's archive?
+                    // for example a Page has the same slug as a CPT rewrite slug (AND has no archive)
+                    if( !empty( $the_post_type->rewrite['slug'] ) && !$the_post_type->has_archive )
+                    {
+                        $faux_parent        = get_page_by_path( $the_post_type->rewrite['slug'] );
+                        $faux_parent_id     = $faux_parent->ID;
+                        $faux_archive       = get_permalink( $faux_parent_id );
+
+                        // does our CPT archive slug match an existing Page?
+                        if( !empty( $faux_archive ) )   // TODO: determine if this is completely effective
                         {
-                            $cpt_page_hierarchy = array();
-                            foreach( $cpt_pages as $cpt_page_ref )
-                            {
-                                $cpt_page   = get_post( $cpt_page_ref['ID'] );
-
-                                // grab our author info
-                                $author     = get_userdata( $cpt_page->post_author );
-
-                                $new_cpt = array(
-                                        'ID'        => $cpt_page->ID,
-                                        'pad'       => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ',
-                                        'title'     => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ' . $cpt_page->post_title,
-                                        'author'    => $author->display_name,
-                                        'comments'  => $cpt_page->comment_count,
-                                        'date'      => date( get_option( 'date_format' ), strtotime( $cpt_page->post_date ) ),
-                                        'order'     => $cpt_page->menu_order,
-                                        'parent'    => ( $cpt_page->post_parent != 0 ) ? $cpt_page->post_parent : $post_type,
-                                        'post_type' => $cpt_page->post_type
-                                    );
-
-                                $new_entry = array(
-                                        'entry'     => $new_cpt,
-                                        'order'     => $cpt_page->menu_order,
-                                        'parent'    => ( $cpt_page->post_parent != 0 ) ? $cpt_page->post_parent : $post_type,
-                                        'post_type' => $cpt_page->post_type
-                                    );
-
-                                // we'll go ahead and append our entry because it's already in order
-                                $cpt_page_hierarchy[] = $new_entry;
-                            }
-
-                            // append the CPT entry hierarchy to the main hierarchy since it's already in order and properly padded
-                            if( is_array( $cpt_page_hierarchy ) )
-                            {
-                                foreach( $cpt_page_hierarchy as $cpt_entry )
-                                {
-                                    $hierarchy[] = $cpt_entry;
-                                }
-                                unset( $cpt_page_hierarchy );
-                            }
+                            // let's set the right parent
+                            $target_parent = $faux_parent_id;
                         }
                     }
 
-                    // we'll never need this again so we'll remove it because we're going to dump out the leftovers at the end
-                    unset( $post_types[$post_type] );
+                    if( $pages[$i]['ID'] == $target_parent )
+                    {
+                        // we do have an applicable parent, let's build in our CPT entry
+                        $pad = '&#8212; ';
+
+                        // continuing with our edge case considering a customized front on the permalink structure
+                        // in conjunction with a Posts Page, we might end up with an extra padding level
+                        if( !empty( $wp_rewrite->front ) && $posts_page && $posts_page == $pages[$i]['ID'] && $post_type == 'post' )
+                            $pad = '';
+
+                        $base_pad = Hierarchy::get_pad( get_page( $target_parent ) ) . $pad;
+
+                        $cpt = array(
+                                'ID'        => $post_type,
+                                'post_type' => $post_type,
+                                'pad'       => $base_pad,
+                                'title'     => $post_type,
+                                'author'    => '',
+                                'comments'  => '',
+                                'date'      => '',
+                                'order'     => $order
+                            );
+
+
+                        $new = array(
+                                'entry'     => $cpt,
+                                'order'     => $order,
+                                'post_type' => $post_type,
+                                'parent'    => $target_parent
+                            );
+
+                        // instead of appending, we need to inject
+                        $hierarchy = $this->inject_hierarchy_entry( $hierarchy, $new );
+
+                        // we've added our CPT index entry, but we need to handle the CPT entries as well
+                        if(  !empty( $settings['post_types'][$post_type]['entries'] ) )
+                        {
+                            if( $the_post_type->hierarchical )
+                            {
+                                $cpt_pages = $this->get_pages( $post_type );
+                            }
+                            else
+                            {
+                                $cpt_pages = $this->get_posts( $post_type );
+                            }
+
+                            if( !empty( $cpt_pages ) )
+                            {
+                                $cpt_page_hierarchy = array();
+                                foreach( $cpt_pages as $cpt_page_ref )
+                                {
+                                    $cpt_page   = get_post( $cpt_page_ref['ID'] );
+
+                                    // grab our author info
+                                    $author     = get_userdata( $cpt_page->post_author );
+
+                                    $new_cpt = array(
+                                            'ID'        => $cpt_page->ID,
+                                            'pad'       => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ',
+                                            'title'     => $base_pad . Hierarchy::get_pad( $cpt_page ) . '&#8212; ' . $cpt_page->post_title,
+                                            'author'    => $author->display_name,
+                                            'comments'  => $cpt_page->comment_count,
+                                            'date'      => date( get_option( 'date_format' ), strtotime( $cpt_page->post_date ) ),
+                                            'order'     => $cpt_page->menu_order,
+                                            'parent'    => ( $cpt_page->post_parent != 0 ) ? $cpt_page->post_parent : $post_type,
+                                            'post_type' => $cpt_page->post_type
+                                        );
+
+                                    $new_entry = array(
+                                            'entry'     => $new_cpt,
+                                            'order'     => $cpt_page->menu_order,
+                                            'parent'    => ( $cpt_page->post_parent != 0 ) ? $cpt_page->post_parent : $post_type,
+                                            'post_type' => $cpt_page->post_type
+                                        );
+
+                                    // we'll go ahead and append our entry because it's already in order
+                                    $cpt_page_hierarchy[] = $new_entry;
+                                }
+
+                                // append the CPT entry hierarchy to the main hierarchy since it's already in order and properly padded
+                                if( is_array( $cpt_page_hierarchy ) )
+                                {
+                                    foreach( $cpt_page_hierarchy as $cpt_entry )
+                                    {
+                                        $hierarchy[] = $cpt_entry;
+                                    }
+                                    unset( $cpt_page_hierarchy );
+                                }
+                            }
+                        }
+
+                        // we'll never need this again so we'll remove it because we're going to dump out the leftovers at the end
+                        unset( $post_types[$post_type] );
+                    }
                 }
             }
         }
@@ -476,8 +537,8 @@ class Hierarchy
             // we have some 'left over' CPTs that have no parents so let's append them
             foreach( $post_types as $post_type )
             {
-                // we definitely do not want to include Pages here
-                if( $post_type->name != 'page' )
+                // we definitely do not want to include Pages here, or omitted CPTs
+                if( $post_type->name != 'page' && empty( $settings['post_types'][$post_type->name]['omit'] ) )
                 {
                     // we need to put it in the proper place
                     $order = ( !empty( $settings['post_types'][$post_type->name]['order'] ) ) ? intval( $settings['post_types'][$post_type->name]['order'] ) : 0;
@@ -716,12 +777,17 @@ class Hierarchy
         {
             $post_type_name = $post_type->name;
 
-            $order = isset( $settings['post_types'][$post_type_name]['order'] ) ? intval( $settings['post_types'][$post_type_name]['order'] ) : 0;
+            $order      = isset( $settings['post_types'][$post_type_name]['order'] ) ? intval( $settings['post_types'][$post_type_name]['order'] ) : 0;
+
+            $entries    = isset( $settings['post_types'][$post_type_name]['entries'] ) ? true : false;
+            $omit       = isset( $settings['post_types'][$post_type_name]['omit'] ) ? true : false;
 
             $post_types[] = array(
                     'name'          => $post_type_name,
                     'title'         => $post_type->labels->name,
-                    'order'         => $order
+                    'order'         => $order,
+                    'entries'       => $entries,
+                    'omit'          => $omit,
                 );
         }
 
@@ -742,14 +808,18 @@ class Hierarchy
         <div id="hierarchy-cpt-wrapper">
             <?php $table->display(); ?>
             <p>
+                <strong>Show Entries:</strong> Include CPT entries in the Hierarchy<br />
+                <strong>Omit:</strong> Ignore CPT completely in the Hierarchy<br />
                 <strong>Order:</strong> customize the <code>menu_order</code> for the CPT
             </p>
         </div>
         <style type="text/css">
             #hierarchy-cpt-wrapper p { padding-top:5px; }
             #hierarchy-cpt-wrapper .tablenav { display:none; }
-            #hierarchy-cpt-wrapper .column-title { width:80%; }
-            #hierarchy-cpt-wrapper .column-order { width:20%; }
+            #hierarchy-cpt-wrapper .column-title { width:50%; }
+            #hierarchy-cpt-wrapper .column-entries { width:20%; }
+            #hierarchy-cpt-wrapper .column-omit { width:15%; }
+            #hierarchy-cpt-wrapper .column-order { width:15%; }
         </style>
     <?php }
 

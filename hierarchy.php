@@ -3,7 +3,7 @@
  Plugin Name: Hierarchy
  Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 0.1
+ Version: 0.2
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
 */
@@ -30,7 +30,7 @@
 if( !defined( 'IS_ADMIN' ) )
     define( 'IS_ADMIN',  is_admin() );
 
-define( 'HIERARCHY_VERSION', '0.1' );
+define( 'HIERARCHY_VERSION', '0.2' );
 define( 'HIERARCHY_PREFIX', '_iti_hierarchy_' );
 define( 'HIERARCHY_DIR', WP_PLUGIN_DIR . '/' . basename( dirname( __FILE__ ) ) );
 define( 'HIERARCHY_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );
@@ -157,12 +157,60 @@ class Hierarchy
                         $menu_slug = 'edit.php?post_type=' . $post_type->name;
                     }
 
+                    // do we want to add a 'convenience' link back to the CPT index?
+                    $active_post_type = '';
+                    if( isset( $_REQUEST['post'] ) )
+                    {
+
+                        $active_post_type = get_post_type( intval( $_REQUEST['post'] ) );
+                    }
+                    elseif( isset( $_REQUEST['post_type'] ) )
+                    {
+                        $active_post_type = sanitize_text_field( $_REQUEST['post_type'] );
+                    }
+
                     // get rid of it
-                    remove_menu_page( $menu_slug );
+                    if( $post_type->name != $active_post_type )
+                    {
+                        remove_menu_page( $menu_slug );
+                    }
+                    else
+                    {
+                        // we need to move it up top...
+                        foreach( $menu as $key => $menu_item )
+                        {
+                            if( isset( $menu_item[5] ) && $menu_item[5] == 'menu-posts-' . $active_post_type )
+                            {
+                                // we need to remove the original first
+                                remove_menu_page( $menu_slug );
+
+                                // we're going to bump all the keys to make room for a potential
+                                // context link when editing a CPT
+                                $menu_updated = array();
+
+                                foreach( $menu as $key => $final_menu_item )
+                                {
+                                    if( $key <= $position )
+                                    {
+                                        $menu_updated[$key] = $final_menu_item;
+                                    }
+                                    else
+                                    {
+                                        $menu_updated[$key+1] = $final_menu_item;
+                                    }
+                                }
+
+                                // we can put everything back now
+                                $menu = $menu_updated;
+                                unset( $menu_updated );
+
+                                $menu[$position+1] = $menu_item;
+                            }
+                        }
+                    }
                 }
             }
         }
-
     }
 
 
@@ -422,14 +470,18 @@ class Hierarchy
                     if( !empty( $the_post_type->rewrite['slug'] ) && !$the_post_type->has_archive )
                     {
                         $faux_parent        = get_page_by_path( $the_post_type->rewrite['slug'] );
-                        $faux_parent_id     = $faux_parent->ID;
-                        $faux_archive       = get_permalink( $faux_parent_id );
 
-                        // does our CPT archive slug match an existing Page?
-                        if( !empty( $faux_archive ) )   // TODO: determine if this is completely effective
+                        if( $faux_parent )
                         {
-                            // let's set the right parent
-                            $target_parent = $faux_parent_id;
+                            $faux_parent_id     = $faux_parent->ID;
+                            $faux_archive       = get_permalink( $faux_parent_id );
+
+                            // does our CPT archive slug match an existing Page?
+                            if( !empty( $faux_archive ) )   // TODO: determine if this is completely effective
+                            {
+                                // let's set the right parent
+                                $target_parent = $faux_parent_id;
+                            }
                         }
                     }
 

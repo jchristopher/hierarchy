@@ -4,7 +4,7 @@ Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.3
 Tested up to: 3.3.1
-Stable tag: 0.1
+Stable tag: 0.2
 
 Properly structure your Pages, Posts, and Custom Post Types
 
@@ -33,9 +33,15 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 
 == Changelog ==
 
+= 0.2 =
+* Added a contextual CPT management link to the admin sidebar that displays only when editing an entry of that CPT
+* Added option to include CPT entries within the Hierarchy. Added option to omit a CPT from the Hierarchy entirely.
+* CPT with a rewrite slug that matches an existing Page will respect that relationship and be inserted as a child of that Page
+* Posts Page is now placed properly when a custom permalink front has been put in place
+
 = 0.1 =
 * Initial release
 
 == Roadmap ==
 
-* Automatic inclusion of CPT entries when inserting a hierarchical CPT
+* Edge case fixes

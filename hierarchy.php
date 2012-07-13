@@ -3,7 +3,7 @@
  Plugin Name: Hierarchy
  Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 0.2
+ Version: 0.3
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
 */
@@ -30,7 +30,7 @@
 if( !defined( 'IS_ADMIN' ) )
     define( 'IS_ADMIN',  is_admin() );
 
-define( 'HIERARCHY_VERSION', '0.2' );
+define( 'HIERARCHY_VERSION', '0.3' );
 define( 'HIERARCHY_PREFIX', '_iti_hierarchy_' );
 define( 'HIERARCHY_DIR', WP_PLUGIN_DIR . '/' . basename( dirname( __FILE__ ) ) );
 define( 'HIERARCHY_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );
@@ -362,7 +362,7 @@ class Hierarchy
      */
     function get_hierarchy()
     {
-        global $wp_rewrite;
+        global $wp_rewrite, $wp_version;
 
         $settings = get_option( HIERARCHY_PREFIX . 'settings' );
 
@@ -403,6 +403,7 @@ class Hierarchy
                 // make sure we're not omitting this post type entirely as per the Settings
                 if( empty( $settings['post_types'][$post_type->name]['omit'] ) )
                 {
+
                     $target_parent  = 0;        // safe to assume there's no parent
 
                     $the_post_type = $post_type;
@@ -418,13 +419,28 @@ class Hierarchy
 
                     $order = ( !empty( $settings['post_types'][$post_type]['order'] ) ) ? intval( $settings['post_types'][$post_type]['order'] ) : 0;
 
+                    // with WordPress 3.4 the $wp_rewrite data structure changed
+                    if( version_compare( $wp_version, '3.4', '>=' ) )
+                    {
+                        $struct = $wp_rewrite->extra_permastructs[$post_type]['struct'];
+                    }
+                    else
+                    {
+                        // legacy
+                        $struct = '';
+                        if( $wp_rewrite->extra_permastructs[$post_type][1] )
+                        {
+                            $struct = $wp_rewrite->extra_permastructs[$post_type][0];
+                        }
+                    }
+
                     // we can only figure out the parent if WordPress knows about the archive slug
                     if( isset( $wp_rewrite->extra_permastructs[$post_type] )
-                        && $wp_rewrite->extra_permastructs[$post_type][1] === 1 ) // make sure rewrite is enabled
+                        && !empty( $struct ) ) // make sure rewrite is enabled
                     {
 
                         // we have a permalink structure for the CPT at hand...
-                        $cpt_archive_slug = $wp_rewrite->extra_permastructs[$post_type][0];
+                        $cpt_archive_slug = $struct;
 
                         // let's break it up into URI segments
                         $cpt_archive_slug = explode( '/', trim( $cpt_archive_slug ) );

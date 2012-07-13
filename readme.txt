@@ -3,8 +3,8 @@ Contributors: jchristopher
 Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.3
-Tested up to: 3.3.1
-Stable tag: 0.2
+Tested up to: 3.4.1
+Stable tag: 0.3
 
 Properly structure your Pages, Posts, and Custom Post Types
 
@@ -32,6 +32,9 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 3. Hierarchy Settings
 
 == Changelog ==
+
+= 0.3 =
+* Added a fix for CPTs not being nested properly in WordPress 3.4+
 
 = 0.2 =
 * Added a contextual CPT management link to the admin sidebar that displays only when editing an entry of that CPT

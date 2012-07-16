@@ -102,6 +102,7 @@ class Hierarchy
 
             // our default settings
             $this->settings = array(
+                    'per_page'      => '-1',
                     'version'       => HIERARCHY_VERSION
                 );
 
@@ -767,34 +768,43 @@ class Hierarchy
     {
         // flag our settings
         register_setting(
-            HIERARCHY_PREFIX . 'settings',                  // group
-            HIERARCHY_PREFIX . 'settings',                  // name of options
-            array( 'Hierarchy', 'validate_settings' )       // validation callback
+            HIERARCHY_PREFIX . 'settings',
+            HIERARCHY_PREFIX . 'settings',
+            array( 'Hierarchy', 'validate_settings' )
         );
 
         add_settings_section(
-            HIERARCHY_PREFIX . 'settings',                  // section ID
-            'Settings',                                     // title
-            array( 'Hierarchy', 'edit_settings' ),          // display callback
-            HIERARCHY_PREFIX . 'settings'                   // page name (do_settings_sections)
+            HIERARCHY_PREFIX . 'settings',
+            __( 'Settings', 'hierarchy'),
+            array( 'Hierarchy', 'edit_settings' ),
+            HIERARCHY_PREFIX . 'settings'
+        );
+
+        // pagination
+        add_settings_field(
+            HIERARCHY_PREFIX . 'per_page',
+            __( 'Items per page', 'hierarchy'),
+            array( 'Hierarchy', 'edit_per_page' ),
+            HIERARCHY_PREFIX . 'settings',
+            HIERARCHY_PREFIX . 'settings'
         );
 
         // table for placing CPTs
         add_settings_field(
-            HIERARCHY_PREFIX . 'cpts',                      // unique field ID
-            'Custom Post Type Locations',                   // title
-            array( 'Hierarchy', 'edit_cpt_placement' ),     // input box display callback
-            HIERARCHY_PREFIX . 'settings',                  // page name (as above)
-            HIERARCHY_PREFIX . 'settings'                   // first arg to add_settings_section
+            HIERARCHY_PREFIX . 'cpts',
+            __( 'Custom Post Type Locations', 'hierarchy'),
+            array( 'Hierarchy', 'edit_cpt_placement' ),
+            HIERARCHY_PREFIX . 'settings',
+            HIERARCHY_PREFIX . 'settings'
         );
 
         // hide links from admin menu
         add_settings_field(
-            HIERARCHY_PREFIX . 'hidden',                    // unique field ID
-            'Hide from the Admin Menu',                     // title
-            array( 'Hierarchy', 'edit_hidden_post_types' ), // input box display callback
-            HIERARCHY_PREFIX . 'settings',                  // page name (as above)
-            HIERARCHY_PREFIX . 'settings'                   // first arg to add_settings_section
+            HIERARCHY_PREFIX . 'hidden',
+            __( 'Hide from the Admin Menu', 'hierarchy'),
+            array( 'Hierarchy', 'edit_hidden_post_types' ),
+            HIERARCHY_PREFIX . 'settings',
+            HIERARCHY_PREFIX . 'settings'
         );
     }
 
@@ -876,9 +886,9 @@ class Hierarchy
         <div id="hierarchy-cpt-wrapper">
             <?php $table->display(); ?>
             <p>
-                <strong>Show Entries:</strong> Include CPT entries in the Hierarchy<br />
-                <strong>Omit:</strong> Ignore CPT completely in the Hierarchy<br />
-                <strong>Order:</strong> customize the <code>menu_order</code> for the CPT
+                <?php _e( '<strong>Show Entries:</strong> Include CPT entries in the Hierarchy', 'hierarchy' ); ?><br />
+                <?php _e( '<strong>Omit:</strong> Ignore CPT completely in the Hierarchy', 'hierarchy' ); ?><br />
+                <?php _e( '<strong>Order:</strong> customize the <code>menu_order</code> for the CPT', 'hierarchy' ); ?>
             </p>
         </div>
         <style type="text/css">
@@ -912,6 +922,16 @@ class Hierarchy
                 </label>
             </div>
         <?php }
+    }
+
+
+    function edit_per_page()
+    {
+        // grab our existing settings
+        $settings = get_option( HIERARCHY_PREFIX . 'settings' );
+        ?>
+            <input type="text" name="<?php echo HIERARCHY_PREFIX; ?>settings[per_page]" id="<?php echo HIERARCHY_PREFIX; ?>settings[per_page]" value="<?php echo isset( $settings['per_page'] ) ? intval( $settings['per_page'] ) : '-1'; ?>" class="small-text" /> <p class="description"><?php _e( 'To show all, use <strong>-1</strong>', 'hierarchy' ); ?></p>
+        <?php
     }
 
 

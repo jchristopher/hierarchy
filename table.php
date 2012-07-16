@@ -259,7 +259,15 @@ class HierarchyTable extends WP_List_Table
     function prepare_items( $hierarchy = null )
     {
         // pagination
-        $per_page   = 100; // TODO: make this a setting
+        if( defined( 'HIERARCHY_PREFIX' ) )
+        {
+            $settings = get_option( HIERARCHY_PREFIX . 'settings' );
+            $per_page = intval( $settings['per_page'] );
+        }
+        else
+        {
+            $per_page = 100;
+        }
 
         // define our column headers
         $columns                = $this->get_columns();
@@ -274,19 +282,27 @@ class HierarchyTable extends WP_List_Table
         $current_page   = $this->get_pagenum();
         $total_items    = count($data);
 
-        // the class doesn't handle pagination, so we need to trim the data to only the page we're viewing
-        $data           = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
+        if( $per_page > 0 )
+        {
+            // if we do want pagination, we'll just split our array
+
+            // the class doesn't handle pagination, so we need to trim the data to only the page we're viewing
+            $data = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
+        }
 
         // our data has been prepped (i.e. sorted) and we can now use it
-        $this->items    = $data;
+        $this->items = $data;
 
-        // register our pagination options and calculations
-        $this->set_pagination_args( array(
-                'total_items' => $total_items,                  // WE have to calculate the total number of items
-                'per_page'    => $per_page,                     // WE have to determine how many items to show on a page
-                'total_pages' => ceil($total_items/$per_page)   // WE have to calculate the total number of pages
-            )
-        );
+        if( $per_page > 0 )
+        {
+            // register our pagination options and calculations
+            $this->set_pagination_args( array(
+                    'total_items' => $total_items,                  // WE have to calculate the total number of items
+                    'per_page'    => $per_page,                     // WE have to determine how many items to show on a page
+                    'total_pages' => ceil($total_items/$per_page)   // WE have to calculate the total number of pages
+                )
+            );
+        }
 
     }
 }

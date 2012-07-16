@@ -33,6 +33,9 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 
 == Changelog ==
 
+= 0.4 =
+* Pagination for 'Content' is now a Setting
+
 = 0.3 =
 * Added a fix for CPTs not being nested properly in WordPress 3.4+
 

@@ -125,7 +125,7 @@ class HierarchyTable extends WP_List_Table
             }
         }
 
-        return '<img src="' . $icon . '" alt="Post icon" />';
+         return '<div class="icon-' . $item['post_type'] . '"><img src="' . $icon . '" alt="Post icon" /></div>';
     }
 
 

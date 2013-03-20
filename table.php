@@ -140,11 +140,12 @@ class HierarchyTable extends WP_List_Table
     function column_title( $item )
     {
         // build row actions
-        $actions = array();
+        $actions        = array();
+        $item           = $item['entry'];
+        $title          = $item['title'];
 
-        $item = $item['entry'];
-
-        $title = $item['title'];
+        $count          = 0;
+        $count_label    = '';
 
         // we need to make this contextual as per the content type
         if( is_int( $item['ID'] ) )
@@ -185,6 +186,21 @@ class HierarchyTable extends WP_List_Table
 
             $actions['edit'] = '<a href="' . $edit_url . '">Edit</a>';
 
+            // set entry count
+            $counts = wp_count_posts( $cpt->name );
+
+            // we've got counts broken out by status, so let's get a comprehensive number
+            if( isset( $counts->publish ) ) $count += (int) $counts->publish;
+            if( isset( $counts->future ) )  $count += (int) $counts->future;
+            if( isset( $counts->draft ) )   $count += (int) $counts->draft;
+            if( isset( $counts->pending ) ) $count += (int) $counts->pending;
+            if( isset( $counts->private ) ) $count += (int) $counts->private;
+            if( isset( $counts->inherit ) ) $count += (int) $counts->inherit;
+
+            $count_label .= ' (' . $count . ' ';
+            $count_label .= ( $count == 1 ) ? __( $cpt->labels->singular_name, 'hierarchy' ) : __( $cpt->labels->name, 'hierarchy' );
+            $count_label .= ') ';
+
             // let's check to see if we in fact have a CPT archive to use for the View link
             if( $cpt->has_archive || $cpt->name == 'post' && $posts_page )
             {
@@ -221,8 +237,15 @@ class HierarchyTable extends WP_List_Table
             }
         }
 
+
+
+
         // return the title contents
-        return '<strong><a class="row-title" href="' . $edit_url . '">' . $title . '</a></strong>' . $this->row_actions( $actions );
+        $final_title = '<strong><a class="row-title" href="' . $edit_url . '">' . $title . '</a></strong>';
+        if( $count ) $final_title .= $count_label;
+        $final_title .= $this->row_actions( $actions );
+
+        return $final_title;
     }
 
 
@@ -273,19 +296,18 @@ class HierarchyTable extends WP_List_Table
         $columns                = $this->get_columns();
         $hidden                 = array();
         $sortable               = $this->get_sortable_columns();
-        $this->_column_headers  = array($columns, $hidden, $sortable); // actually set the data
+        $this->_column_headers  = array( $columns, $hidden, $sortable ); // actually set the data
 
         // define our data to be shown
         $data = $hierarchy;
 
         // find out what page we're currently on and get pagination set up
         $current_page   = $this->get_pagenum();
-        $total_items    = count($data);
+        $total_items    = count( $data );
 
         if( $per_page > 0 )
         {
             // if we do want pagination, we'll just split our array
-
             // the class doesn't handle pagination, so we need to trim the data to only the page we're viewing
             $data = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
         }
@@ -297,9 +319,9 @@ class HierarchyTable extends WP_List_Table
         {
             // register our pagination options and calculations
             $this->set_pagination_args( array(
-                    'total_items' => $total_items,                  // WE have to calculate the total number of items
-                    'per_page'    => $per_page,                     // WE have to determine how many items to show on a page
-                    'total_pages' => ceil($total_items/$per_page)   // WE have to calculate the total number of pages
+                    'total_items' => $total_items,
+                    'per_page'    => $per_page,
+                    'total_pages' => ceil( $total_items / $per_page ),
                 )
             );
         }

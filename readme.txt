@@ -3,8 +3,8 @@ Contributors: jchristopher
 Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.3
-Tested up to: 3.4.1
-Stable tag: 0.3
+Tested up to: 3.5.1
+Stable tag: 0.4
 
 Properly structure your Pages, Posts, and Custom Post Types
 
@@ -34,7 +34,9 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 == Changelog ==
 
 = 0.4 =
-* Pagination for 'Content' is now a Setting
+* You can now implement pagination on the main 'Content' page
+* Aded entry count when considering CPTs to better call attention to posts within
+* Cleaned up a PHP Warning
 
 = 0.3 =
 * Added a fix for CPTs not being nested properly in WordPress 3.4+

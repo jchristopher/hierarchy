@@ -423,7 +423,7 @@ class Hierarchy
                     // with WordPress 3.4 the $wp_rewrite data structure changed
                     if( version_compare( $wp_version, '3.4', '>=' ) )
                     {
-                        $struct = $wp_rewrite->extra_permastructs[$post_type]['struct'];
+                        $struct = isset( $wp_rewrite->extra_permastructs[$post_type]['struct'] ) ? $wp_rewrite->extra_permastructs[$post_type]['struct'] : '';
                     }
                     else
                     {
@@ -775,8 +775,17 @@ class Hierarchy
 
         add_settings_section(
             HIERARCHY_PREFIX . 'settings',
-            __( 'Settings', 'hierarchy'),
+            __( 'Settings', 'hierarchy' ),
             array( 'Hierarchy', 'edit_settings' ),
+            HIERARCHY_PREFIX . 'settings'
+        );
+
+        // table for placing CPTs
+        add_settings_field(
+            HIERARCHY_PREFIX . 'cpts',
+            __( 'Custom Post Type Locations', 'hierarchy' ),
+            array( 'Hierarchy', 'edit_cpt_placement' ),
+            HIERARCHY_PREFIX . 'settings',
             HIERARCHY_PREFIX . 'settings'
         );
 
@@ -789,19 +798,10 @@ class Hierarchy
             HIERARCHY_PREFIX . 'settings'
         );
 
-        // table for placing CPTs
-        add_settings_field(
-            HIERARCHY_PREFIX . 'cpts',
-            __( 'Custom Post Type Locations', 'hierarchy'),
-            array( 'Hierarchy', 'edit_cpt_placement' ),
-            HIERARCHY_PREFIX . 'settings',
-            HIERARCHY_PREFIX . 'settings'
-        );
-
         // hide links from admin menu
         add_settings_field(
             HIERARCHY_PREFIX . 'hidden',
-            __( 'Hide from the Admin Menu', 'hierarchy'),
+            __( 'Hide from the Admin Menu', 'hierarchy' ),
             array( 'Hierarchy', 'edit_hidden_post_types' ),
             HIERARCHY_PREFIX . 'settings',
             HIERARCHY_PREFIX . 'settings'

@@ -3,7 +3,7 @@
  Plugin Name: Hierarchy
  Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 0.4
+ Version: 0.5
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
 */
@@ -30,7 +30,7 @@
 if( !defined( 'IS_ADMIN' ) )
     define( 'IS_ADMIN',  is_admin() );
 
-define( 'HIERARCHY_VERSION', '0.4' );
+define( 'HIERARCHY_VERSION', '0.5' );
 define( 'HIERARCHY_PREFIX', '_iti_hierarchy_' );
 define( 'HIERARCHY_DIR', WP_PLUGIN_DIR . '/' . basename( dirname( __FILE__ ) ) );
 define( 'HIERARCHY_URL', rtrim( plugin_dir_url( __FILE__ ), '/' ) );

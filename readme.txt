@@ -3,14 +3,30 @@ Contributors: jchristopher
 Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.3
-Tested up to: 3.5.1
-Stable tag: 0.4
+Tested up to: 3.7
+Stable tag: 0.5
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Properly structure your Pages, Posts, and Custom Post Types
+Move your Pages/Posts/Custom Post Type admin links from the sidebar to a Content menu that nests everything where it should be
 
 == Description ==
 
-Hierarchy allows you to contextually include your Custom Post Types within your Pages. Please see [the introduction](http://jchr.co/rv).
+Custom Post Types (sometimes) need context, Hierarchy allows you to rework your content management workflow by essentially **moving Custom Post Type admin menus into your Pages list**. What this does is mimic the navigation you've set up on your site by placing Custom Post Type edit links amongst your Pages where they belong.
+
+= Custom Post Types NEED context =
+
+Custom Post Types are great, but the **editing workflow can be improved**. Adding a Custom Post Type likely results in *another* WordPress admin sidebar menu, abstracting the management of that content from the main organization of your site, Pages. Hierarchy intelligently extends your Pages menu by including your Custom Post Type admin links *within* the Page structure, allowing for a much more natural workflow when managing your content.
+
+= Examples =
+
+Chances are you've customized your `Front page displays` setting to display a static page instead of your latest blog posts. Now you've got a sidebar link to manage your Posts and a WordPress Page called "Blog" that sites in your list of Pages doing absolutely nothing. Hierarchy remedies both problems by converting the "Blog" page link to be one that lists your Posts. It also hides the Posts sidebar entry (if you want it to).
+
+It's also likely that you're utilizing Custom Post Types to power sections of your website, but it's akward to manage the content of an internal section of your website using the main WordPress admin sidebar links to your Custom Post Type. Hierarchy will allow you to hide those sidebar links and instead nest them amongst your Pages, providing contextual links to manage the content of your Custom Post Types.
+
+= More information =
+
+If you'd like a lot more information on the implementation and workflow changes, [check out the screenshots](http://wordpress.org/plugins/hierarchy/screenshots/) and please see [the introduction](http://jchr.co/rv).
 
 == Installation ==
 
@@ -32,6 +48,10 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 3. Hierarchy Settings
 
 == Changelog ==
+
+= 0.5 =
+* Improved README, added banner image to help explain Hierarchy
+* Tested with WordPress 3.7
 
 = 0.4 =
 * You can now implement pagination on the main 'Content' page

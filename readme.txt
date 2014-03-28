@@ -20,7 +20,7 @@ Custom Post Types are great, but the **editing workflow can be improved**. Addin
 
 = Examples =
 
-Chances are you've customized your `Front page displays` setting to display a static page instead of your latest blog posts. Now you've got a sidebar link to manage your Posts and a WordPress Page called "Blog" that sites in your list of Pages doing absolutely nothing. Hierarchy remedies both problems by converting the "Blog" page link to be one that lists your Posts. It also hides the Posts sidebar entry (if you want it to).
+Chances are you've customized your `Front page displays` setting to display a static page instead of your latest blog posts. Now you've got a sidebar link to manage your Posts and a WordPress Page called "Blog" that sits in your list of Pages doing absolutely nothing. Hierarchy remedies both problems by converting the "Blog" page link to be one that lists your Posts. It also hides the Posts sidebar entry (if you want it to).
 
 It's also likely that you're utilizing Custom Post Types to power sections of your website, but it's akward to manage the content of an internal section of your website using the main WordPress admin sidebar links to your Custom Post Type. Hierarchy will allow you to hide those sidebar links and instead nest them amongst your Pages, providing contextual links to manage the content of your Custom Post Types.
 

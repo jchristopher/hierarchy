@@ -129,12 +129,16 @@ class Hierarchy
         global $menu;
 
         // add our 'Content' menu
-        $position = 3;                      // ideally we're in position 3, just below the Dashboard, but above the separator
-        while( isset( $menu[$position] ) )  // we don't want to override an existing $menu entry so let's find the closest
-            $position++;
+        $position = apply_filters( 'hierarchy_position', 3 ); // ideally we're in position 3, just below the Dashboard, but above the separator
+        while( isset( $menu[$position] ) ) {
+	        // we don't want to override an existing $menu entry so let's find the closest
+	        $position++;
+        }
 
         // add our menu item
-        add_menu_page( __( "Content", "hierarchy" ), __( "Content", "hierarchy" ), "edit_posts", "hierarchy", array( $this, "show_hierarchy" ), HIERARCHY_URL . '/images/icon-hierarchy-menu.png', $position );
+	    $menu_icon = version_compare( get_bloginfo( 'version' ), '3.8', '>=' ) ? 'dashicons-category' : HIERARCHY_URL . '/images/icon-hierarchy-menu.png' ;
+	    $menu_label = apply_filters( 'hierarchy_menu_label', __( "Content", "hierarchy" ) );
+        add_menu_page( $menu_label, $menu_label, "edit_posts", "hierarchy", array( $this, "show_hierarchy" ), $menu_icon, $position );
 
         // do we need to remove any menu entries?
         if( is_array( $this->post_types ) )

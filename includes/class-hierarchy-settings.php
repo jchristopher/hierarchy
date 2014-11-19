@@ -3,30 +3,72 @@
 
 class Hierarchy_Settings extends Hierarchy {
 
+	/**
+	 * Post types with Hierarchy-specific keys of metadata
+	 *
+	 * @since 0.6
+	 * @var array Post types with Hierarchy-specific keys of metadata
+	 */
 	private $post_types_formatted = array();
 
+	/**
+	 * Initializer; add our hooks
+	 *
+	 * @since 0.6
+	 */
 	function init() {
 		add_action( 'admin_menu', array( $this, 'settings_page_link' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 	}
 
+	/**
+	 * Add Settings menu link
+	 */
 	function settings_page_link() {
-		// add options menu under Appearance
-		add_options_page( __( 'Hierarchy', 'hierarchy' ), __( 'Hierarchy', 'hierarchy' ), $this->capability, 'hierarchy-settings', array( $this, 'admin_settings' ) );
+		add_options_page(
+			__( 'Hierarchy', 'hierarchy' ),
+			__( 'Hierarchy', 'hierarchy' ),
+			$this->capability,
+			'hierarchy-settings',
+			array( $this, 'admin_settings' )
+		);
 	}
 
+	/**
+	 * Setter for the capability for Hierarchy to use
+	 *
+	 * @since 0.6
+	 * @param $capability string    WordPress capability to use
+	 */
 	function set_capability( $capability ) {
 		$this->capability = $capability;
 	}
 
+	/**
+	 * Setter for the settings field prefix
+	 *
+	 * @since 0.6
+	 * @param $prefix string    Prefix to use
+	 */
 	function set_prefix( $prefix ) {
 		$this->prefix = $prefix;
 	}
 
+	/**
+	 * Setter for the Hierarchy version (referenced in settings validation routine)
+	 *
+	 * @since 0.6
+	 * @param $version string    Hierarchy version
+	 */
 	function set_version( $version ) {
 		$this->version = $version;
 	}
 
+	/**
+	 * Registration callback for WordPress Settings API
+	 *
+	 * @since 0.6
+	 */
 	function register_settings() {
 		// flag our settings
 		register_setting(
@@ -70,6 +112,11 @@ class Hierarchy_Settings extends Hierarchy {
 		);
 	}
 
+	/**
+	 * Output markup for settings screen
+	 *
+	 * @since 0.6
+	 */
 	function admin_settings() { ?>
 		<div class="wrap">
 			<div id="icon-options-general" class="icon32"><br /></div>
@@ -86,16 +133,56 @@ class Hierarchy_Settings extends Hierarchy {
 		</div>
 	<?php }
 
+	function validate_post_types( $post_types ) {
+		if ( ! is_array( $post_types ) ) {
+			return array();
+		}
+
+		foreach ( $post_types as $post_type => $settings ) {
+
+			if ( ! post_type_exists( $post_type ) ) {
+				unset( $post_types[ $post_type ] );
+				continue;
+			}
+
+			$post_types[ $post_type ] = array(
+				'entries'   => isset( $settings['entries'] ) ? true : false,
+				'omit'      => isset( $settings['omit'] ) ? true : false,
+				'order'     => empty( $settings['order'] ) ? 0 : absint( $settings['order'] )
+			);
+		}
+
+		return $post_types;
+	}
+
+	/**
+	 * Settings save validation callback
+	 *
+	 * @since 0.6
+	 * @param $input array  The data submitted from the settings screen
+	 * @return array        The validated data to save to the database
+	 */
 	function validate_settings( $input ) {
-		// make sure the version is appended
 		$input['version'] = $this->version;
+		$input['per_page'] = isset( $input['per_page'] ) ? intval( $input['per_page'] ) : -1;
 
 		// ensure that the hidden post types are defined
 		if ( ! isset( $input['hidden_from_admin_menu'] ) ) {
 			$input['hidden_from_admin_menu'] = array();
 		}
 
-		// TODO: actually validate!?
+		foreach ( $input['hidden_from_admin_menu'] as $key => $val ) {
+			if ( ! post_type_exists( $val ) ) {
+				unset( $input['hidden_from_admin_menu'][ $key ] );
+			}
+		}
+
+		// validate the post types
+		if ( ! isset( $input['post_types'] ) ) {
+			$input['post_types'] = array();
+		}
+
+		$input['post_types'] = $this->validate_post_types( $input['post_types'] );
 
 		return $input;
 	}
@@ -105,6 +192,8 @@ class Hierarchy_Settings extends Hierarchy {
 	}
 
 	function prepare_post_types() {
+		$post_types = array();
+
 		foreach ( $this->post_types as $post_type ) {
 
 			// we need the object now
@@ -116,8 +205,8 @@ class Hierarchy_Settings extends Hierarchy {
 			}
 
 			$post_type_order = isset( $this->settings['post_types'][ $post_type->name ]['order'] ) ? absint( $this->settings['post_types'][ $post_type->name ]['order'] ) : 0;
-			$post_type_show_entries = isset( $this->settings['post_types'][ $post_type->name ]['entries'] ) ? true : false;
-			$post_type_omit = isset( $this->settings['post_types'][ $post_type->name ]['omit'] ) ? true : false;
+			$post_type_show_entries = empty( $this->settings['post_types'][ $post_type->name ]['entries'] ) ? false : true;
+			$post_type_omit = empty( $this->settings['post_types'][ $post_type->name ]['omit'] ) ? false : true;
 
 			$post_types[] = array(
 				'name'      => $post_type->name,
@@ -164,7 +253,7 @@ class Hierarchy_Settings extends Hierarchy {
 
 	function display_edit_per_page() {
 		?>
-			<input type="text" name="<?php echo $this->prefix; ?>settings[per_page]" id="<?php echo $this->prefix; ?>settings[per_page]" value="<?php echo isset( $this->settings['per_page'] ) ? absint( $this->settings['per_page'] ) : '-1'; ?>" class="small-text" /> <p class="description"><?php _e( 'To show all, use <strong>-1</strong>', 'hierarchy' ); ?></p>
+			<input type="text" name="<?php echo $this->prefix; ?>settings[per_page]" id="<?php echo $this->prefix; ?>settings[per_page]" value="<?php echo isset( $this->settings['per_page'] ) ? intval( $this->settings['per_page'] ) : '-1'; ?>" class="small-text" /> <p class="description"><?php _e( 'To show all, use <strong>-1</strong>', 'hierarchy' ); ?></p>
 		<?php
 	}
 

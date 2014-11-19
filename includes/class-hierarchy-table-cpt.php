@@ -21,7 +21,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
 	 */
 	private $prefix;
 
-    function __construct() {\
+    function __construct() {
         parent::__construct( array(
             'singular'  => 'hierarchycpt',
             'plural'    => 'hierarchycpts',

@@ -1,7 +1,8 @@
 <?php
 
-if( !class_exists( 'WP_List_Table' ) )
-    require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+if ( ! class_exists( 'WP_List_Table' ) ) {
+	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+}
 
 
 /**
@@ -11,14 +12,8 @@ if( !class_exists( 'WP_List_Table' ) )
  * @package WordPress
  * @author Jonathan Christopher
  **/
-class HierarchyCPTTable extends WP_List_Table
-{
-    /**
-     * Constructor
-     *
-     * @package WordPress
-     * @author Jonathan Christopher
-     **/
+class Hierarchy_Table_CPT extends WP_List_Table {
+
     function __construct()
     {
         global $status, $page;

@@ -6,27 +6,35 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 
 
 /**
- * HierarchyCPTTable
+ * Hierarchy_Table_CPT
  * Display registered Custom Post Types in a WP_List_table
  *
- * @package WordPress
  * @author Jonathan Christopher
  **/
 class Hierarchy_Table_CPT extends WP_List_Table {
 
+	/**
+	 * The settings field prefix we're going to use
+	 *
+	 * @since 0.6
+	 * @var string $prefix The settings field prefix we're going to use
+	 */
 	private $prefix;
 
-    function __construct()
-    {
-        global $status, $page;
-
+    function __construct() {\
         parent::__construct( array(
-                'singular'  => 'hierarchycpt',
-                'plural'    => 'hierarchycpts',
-                'ajax'      => false
-            ) );
+            'singular'  => 'hierarchycpt',
+            'plural'    => 'hierarchycpts',
+            'ajax'      => false
+        ) );
     }
 
+	/**
+	 * Setter for the settings fields prefix we need to use
+	 *
+	 * @since 0.6
+	 * @param $prefix
+	 */
 	public function set_prefix( $prefix ) {
 		$this->prefix = $prefix;
 	}
@@ -35,16 +43,13 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     /**
      * Default column handler if there's no specific handler
      *
-     * @package WordPress
      * @author Jonathan Christopher
      * @param $item
      * @param $column_name
      * @return mixed
      */
-    function column_default( $item, $column_name )
-    {
-        switch( $column_name )
-        {
+    function column_default( $item, $column_name ) {
+        switch( $column_name ) {
             case 'title':
             case 'order':
             case 'omit':
@@ -59,19 +64,16 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     /**
      * Define the columns we plan on using
      *
-     * @package WordPress
-     * @author Jonathan Christopher
-     *
      * @return array
      */
-    function get_columns()
-    {
+    function get_columns() {
         $columns = array(
             'title'         => 'Custom Post Type',
             'entries'       => 'Show Entries',
             'omit'          => 'Omit',
             'order'         => 'Order',
         );
+
         return $columns;
     }
 
@@ -79,13 +81,10 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     /**
      * Handle the Title column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
-     * @return
+     * @return string
      */
-    function column_title( $item )
-    {
+    function column_title( $item ) {
         return $item['title'];
     }
 
@@ -93,56 +92,45 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     /**
      * Handle the Order column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
      * @return string
      */
-    function column_order( $item )
-    {
-        return '<input type="text" name="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][order]" id="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][order]" value="' . $item['order'] . '" class="small-text" />';
+    function column_order( $item ) {
+        return '<input type="text" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][order]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][order]" value="' . absint( $item['order'] ) . '" class="small-text" />';
     }
 
 
     /**
      * Handle the Omit column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
-     * @return
+     * @return string
      */
-    function column_omit( $item )
-    {
+    function column_omit( $item ) {
         $checked = $item['omit'] ? ' checked="checked"' : '';
-        return '<input type="checkbox" name="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][omit]" id="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][omit]" value="1"' . $checked . ' />';
+        return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][omit]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][omit]" value="1"' . $checked . ' />';
     }
 
 
     /**
      * Handle the Entries column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
-     * @return
+     * @return string
      */
-    function column_entries( $item )
-    {
+    function column_entries( $item ) {
         $checked = $item['entries'] ? ' checked="checked"' : '';
-        return '<input type="checkbox" name="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][entries]" id="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][entries]" value="1"' . $checked . ' />';
+        return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][entries]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][entries]" value="1"' . $checked . ' />';
     }
 
 
     /**
      * Preps the data for display in the table
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param array $cpts
      */
-    function prepare_items( $cpts = array() )
-    {
+    function prepare_items( $cpts = array() ) {
+
         // define our column headers
         $columns                = $this->get_columns();
         $hidden                 = array();
@@ -153,35 +141,26 @@ class Hierarchy_Table_CPT extends WP_List_Table {
         $data = $cpts;
 
         // our data has been prepped (i.e. sorted) and we can now use it
-        $this->items    = $data;
+        $this->items = $data;
     }
 
 
     /**
      * Overwrite the default display() function because we don't want the nonce
      * as it will interfere with our Settings page
-     *
-     * @package WordPress
-     * @author Jonathan Christopher
      **/
-    function display()
-    { ?>
-        <table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>" cellspacing="0">
+    function display() { ?>
+        <table class="<?php echo esc_attr( implode( ' ', $this->get_table_classes() ) ); ?>" cellspacing="0">
             <thead>
-                <tr>
-                    <?php $this->print_column_headers(); ?>
-                </tr>
+                <tr><?php $this->print_column_headers(); ?></tr>
             </thead>
             <tfoot>
-                <tr>
-                    <?php $this->print_column_headers( false ); ?>
-                </tr>
+                <tr><?php $this->print_column_headers( false ); ?></tr>
             </tfoot>
             <tbody id="the-comment-list" class="list:comment">
                 <?php $this->display_rows_or_placeholder(); ?>
             </tbody>
         </table>
-    <?php
-    }
+    <?php }
 
 }

@@ -4,7 +4,6 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
 
-
 /**
  * Hierarchy_Table_CPT
  * Display registered Custom Post Types in a WP_List_table

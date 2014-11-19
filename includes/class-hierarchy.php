@@ -8,14 +8,77 @@
  * @author Jonathan Christopher
  **/
 class Hierarchy {
+
+	/**
+	 * Plugin directory on disk
+	 *
+	 * @since 0.6
+	 * @var string  Plugin directory on disk
+	 */
 	protected $dir;
+
+	/**
+	 * URL of plugin
+	 *
+	 * @since 0.6
+	 * @var string  URL of plugin
+	 */
 	protected $url;
+
+	/**
+	 * Hierarchy version
+	 *
+	 * @since 0.6
+	 * @var string  Hierarchy version
+	 */
 	protected $version;
+
+	/**
+	 * Plugin name
+	 *
+	 * @since 0.6
+	 * @var string  Plugin name
+	 */
 	protected $plugin_name;
+
+	/**
+	 * Input field and settings prefix
+	 *
+	 * @since 0.6
+	 * @var string  Input field and settings prefix
+	 */
 	protected $prefix;
+
+	/**
+	 * Hierarchy settings
+	 *
+	 * @since 0.6
+	 * @var array   Hierarchy settings
+	 */
 	protected $settings;
+
+	/**
+	 * Registered post types
+	 *
+	 * @since 0.6
+	 * @var array   Registered post types
+	 */
 	protected $post_types;
+
+	/**
+	 * The WordPress capability Hierarchy should use
+	 *
+	 * @since 0.6
+	 * @var mixed|void  The WordPress capability Hierarchy should use
+	 */
 	protected $capability;
+
+	/**
+	 * Admin Menu position for Hierarchy
+	 *
+	 * @since 0.6
+	 * @var int     Admin Menu position for Hierarchy
+	 */
 	protected $menu_position = 3;
 
 	function __construct() {
@@ -38,6 +101,11 @@ class Hierarchy {
 		}
 	}
 
+	/**
+	 * Initializer, fired in plugin bootloader
+	 *
+	 * @since 0.6
+	 */
 	function init() {
 		$this->load_dependencies();
 		$this->init_settings();
@@ -45,6 +113,12 @@ class Hierarchy {
 		$this->add_hooks();
 	}
 
+	/**
+	 * Get registered post types
+	 *
+	 * @since 0.6
+	 * @return array    Get registered post types
+	 */
 	function get_post_types() {
 		$args = array(
 			'public' => true,
@@ -53,15 +127,31 @@ class Hierarchy {
 		return get_post_types( $args, 'names', 'AND' );
 	}
 
+	/**
+	 * Initilize Hierarchy Settings class
+	 *
+	 * @since 0.6
+	 */
 	function init_settings() {
 		$settings = new Hierarchy_Settings();
 		$settings->init();
 	}
 
+	/**
+	 * Getter for the plugin name
+	 *
+	 * @since 0.6
+	 * @return string   The plugin name
+	 */
 	public function get_plugin_name() {
 		return $this->plugin_name;
 	}
 
+	/**
+	 * Require all dependencies
+	 *
+	 * @since 0.6
+	 */
 	function load_dependencies() {
 		require_once $this->dir . 'includes/class-hierarchy-table.php';
 		require_once $this->dir . 'includes/class-hierarchy-table-cpt.php';
@@ -69,17 +159,31 @@ class Hierarchy {
 		require_once $this->dir . 'includes/class-hierarchy-i18n.php';
 	}
 
+	/**
+	 * Set plugin locale
+	 *
+	 * @since 0.6
+	 */
 	function set_locale() {
 		$plugin_i18n = new Hierarchy_i18n();
 		$plugin_i18n->set_domain( $this->get_plugin_name() );
 	}
 
+	/**
+	 * Add WordPress core hooks
+	 *
+	 * @since 0.6
+	 */
 	function add_hooks() {
 		add_action( 'admin_menu', array( $this, 'hijack_admin_menu' ) );
-
 		add_filter( 'plugin_row_meta',  array( 'Hierarchy', 'filter_plugin_row_meta' ), 10, 2 );
 	}
 
+	/**
+	 * Determine which Admin Menu position we're going to utilize
+	 *
+	 * @since 0.6
+	 */
 	function set_menu_position() {
 		global $menu;
 
@@ -94,6 +198,11 @@ class Hierarchy {
 		$this->menu_position = $position;
 	}
 
+	/**
+	 * Add Hierarchy to the Admin Menu
+	 *
+	 * @since 0.6
+	 */
 	function add_menu_item() {
 		$this->set_menu_position();
 
@@ -113,6 +222,13 @@ class Hierarchy {
 		);
 	}
 
+	/**
+	 * Get the Admin Menu slug for a submitted post type
+	 *
+	 * @since 0.6
+	 * @param $post_type string     The post type for which you want the slug
+	 * @return string               The Menu item slug
+	 */
 	function get_menu_slug_from_post_type( $post_type ) {
 
 		switch ( $post_type ) {
@@ -129,7 +245,14 @@ class Hierarchy {
 		return $slug;
 	}
 
-	function maybe_skip_menu_removal( $post_type ) {
+	/**
+	 * Check to see if the submitted post type is active (being worked on)
+	 *
+	 * @since 0.6
+	 * @param $post_type string     The post type to check
+	 * @return bool                 Whether the submitted post type is active
+	 */
+	function is_post_type_active( $post_type ) {
 		if ( ! isset( $_REQUEST['post'] ) && ! isset( $_REQUEST['post_type'] ) ) {
 			return false;
 		}
@@ -139,10 +262,25 @@ class Hierarchy {
 		return $post_type == $active_post_type;
 	}
 
+	/**
+	 * Determine whether the submitted Menu item is for the submitted post type
+	 *
+	 * @since 0.6
+	 * @param $menu_item object     Admin Menu item
+	 * @param $post_type string     The post type to check
+	 * @return bool                 Whether the Menu item is for the post type
+	 */
 	function menu_item_is_for_post_type( $menu_item, $post_type ) {
 		return is_array( $menu_item ) && isset( $menu_item[5] ) && $menu_item[5] == 'menu-posts-' . $post_type;
 	}
 
+	/**
+	 * Remove the Admin Menu entry for the submitted post type
+	 *
+	 * @since 0.6
+	 * @param $post_type string     The post type to remove
+	 * @return mixed                Either the plucked menu item or false
+	 */
 	function pluck_admin_menu_item( $post_type ) {
 		global $menu;
 
@@ -155,6 +293,11 @@ class Hierarchy {
 		return false;
 	}
 
+	/**
+	 * Make room in the Admin Menu for a new item
+	 *
+	 * @since 0.6
+	 */
 	function inject_placeholder_admin_menu_item() {
 		global $menu;
 
@@ -194,6 +337,11 @@ class Hierarchy {
 		$menu[ $this->menu_position + 1 ] = $post_type_admin_menu_item;
 	}
 
+	/**
+	 * Iterate through the saved post types to hide and hide them from the Admin Menu
+	 *
+	 * @since 0.6
+	 */
 	function remove_admin_menu_items() {
 
 		if ( ! is_array( $this->post_types ) ) {
@@ -208,7 +356,7 @@ class Hierarchy {
 
 			// if (right now) we're editing a post type that was hidden from the Admin menu
 			// let's leave the menu links in place for convenience
-			if ( $this->maybe_skip_menu_removal( $post_type_to_hide ) ) {
+			if ( $this->is_post_type_active( $post_type_to_hide ) ) {
 				$this->make_admin_menu_item_contextual( $post_type_to_hide );
 				continue;
 			}
@@ -218,6 +366,11 @@ class Hierarchy {
 		}
 	}
 
+	/**
+	 * Apply our logic to the Admin Menu (remove what needs to be removed and add Hierarchy Menu item)
+	 *
+	 * @since 0.6
+	 */
 	function hijack_admin_menu() {
 		global $menu;
 

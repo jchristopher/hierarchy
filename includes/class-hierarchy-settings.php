@@ -133,6 +133,12 @@ class Hierarchy_Settings extends Hierarchy {
 		</div>
 	<?php }
 
+	/**
+	 * Ensure meta for post types is valid
+	 *
+	 * @param $post_types
+	 * @return array    Valid settings for each post type
+	 */
 	function validate_post_types( $post_types ) {
 		if ( ! is_array( $post_types ) ) {
 			return array();
@@ -187,10 +193,13 @@ class Hierarchy_Settings extends Hierarchy {
 		return $input;
 	}
 
-	function edit_settings() {
+	function edit_settings() {}
 
-	}
-
+	/**
+	 * Retrieve and set Hierarchy-specific metata for each post type
+	 *
+	 * @since 0.6
+	 */
 	function prepare_post_types() {
 		$post_types = array();
 
@@ -220,6 +229,11 @@ class Hierarchy_Settings extends Hierarchy {
 		$this->post_types_formatted = $post_types;
 	}
 
+	/**
+	 * Echo WP_List_Table for post types on Hierarchy settings screen
+	 *
+	 * @since 0.6
+	 */
 	function display_edit_cpt_placement() {
 		$this->prepare_post_types();
 
@@ -251,12 +265,22 @@ class Hierarchy_Settings extends Hierarchy {
 		<?php
 	}
 
+	/**
+	 * Output markup for per_page Hierarchy setting
+	 *
+	 * @since 0.6
+	 */
 	function display_edit_per_page() {
 		?>
 			<input type="text" name="<?php echo $this->prefix; ?>settings[per_page]" id="<?php echo $this->prefix; ?>settings[per_page]" value="<?php echo isset( $this->settings['per_page'] ) ? intval( $this->settings['per_page'] ) : '-1'; ?>" class="small-text" /> <p class="description"><?php _e( 'To show all, use <strong>-1</strong>', 'hierarchy' ); ?></p>
 		<?php
 	}
 
+	/**
+	 * Output markup for checkbox list to hide post types from Admin Menu
+	 *
+	 * @since 0.6
+	 */
 	function display_edit_hidden_post_types() {
 		foreach ( $this->post_types as $post_type ) : $post_type = get_post_type_object( $post_type ); ?>
 			<div style="padding-top:0.4em;">

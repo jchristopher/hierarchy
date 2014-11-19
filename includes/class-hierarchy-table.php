@@ -6,92 +6,122 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 
 
 /**
- * HierarchyTable
+ * Hierarchy_Table
  * Display Hierarchy in a WP_List_table
- *
- * @package WordPress
- * @author Jonathan Christopher
  **/
 class Hierarchy_Table extends WP_List_Table {
-    /**
-     * Constructor
-     *
-     * @package WordPress
-     * @author Jonathan Christopher
-     **/
-    function __construct()
-    {
-        global $status, $page;
 
-        parent::__construct( array(
-                'singular'  => 'hierarchyentry',
-                'plural'    => 'hierarchyentries',
-                'ajax'      => false
-            ) );
+	private $url;
+
+	private $post_types = array();
+
+	function __construct() {
+		parent::__construct( array(
+			'singular'  => 'hierarchyentry',
+			'plural'    => 'hierarchyentries',
+			'ajax'      => false
+		) );
+	}
+
+	public function set_url( $url ) {
+		$this->url = esc_url( $url );
+	}
+
+	public function set_post_types( $post_types ) {
+		$this->post_types = $post_types;
+	}
+
+
+	/**
+	 * Default column handler if there's no specific handler
+	 *
+	 * @param $item
+	 * @param $column_name
+	 * @return mixed
+	 */
+	function column_default( $item, $column_name ) {
+		$item = $item['entry'];
+
+		switch( $column_name ) {
+			case 'title':
+			case 'author':
+			case 'comments':
+			case 'date':
+			case 'icon':
+				return $item[$column_name];
+			default:
+				return print_r( $item, true ); // worst case, output for debugging
+		}
+	}
+
+
+	/**
+	 * Define the columns we plan on using
+	 *
+	 * @return array
+	 */
+	function get_columns() {
+		$columns = array(
+			'icon'      => '',
+			'title'     => __( 'Title', 'hierarchy' ),
+			'author'    => __( 'Author', 'hierarchy' ),
+			'comments'  => '<span><span class="vers"><img src="' . get_admin_url() . 'images/comment-grey-bubble.png" alt="Comments" /></span></span>',
+			'date'      => __( 'Date', 'hierarchy' )
+		);
+
+		return $columns;
     }
 
-
-    /**
-     * Default column handler if there's no specific handler
-     *
-     * @package WordPress
-     * @author Jonathan Christopher
-     * @param $item
-     * @param $column_name
-     * @return mixed
-     */
-    function column_default( $item, $column_name )
-    {
-        $item = $item['entry'];
-
-        switch( $column_name )
-        {
-            case 'title':
-            case 'author':
-            case 'comments':
-            case 'date':
-            case 'icon':
-                return $item[$column_name];
-            default:
-                return print_r( $item, true ); // worst case, output for debugging
-        }
-    }
-
-
-    /**
-     * Define the columns we plan on using
-     *
-     * @package WordPress
-     * @author Jonathan Christopher
-     *
-     * @return array
-     */
-    function get_columns()
-    {
-        $columns = array(
-            'icon'      => '',
-            'title'     => 'Title',
-            'author'    => 'Author',
-            'comments'  => '<span><span class="vers"><img src="' . get_admin_url() . 'images/comment-grey-bubble.png" alt="Comments" /></span></span>',
-            'date'      => 'Date'
-        );
-        return $columns;
-    }
+	function get_post_type_icon( $post_type ) {
+		switch ( $post_type ) {
+			case 'page':
+				$icon = '/images/' . 'icon-page.png';
+				break;
+			case 'post':
+				$icon = '/images/' . 'icon-post.png';
+				break;
+			default: // custom post type
+				$icon = '/images/' . 'icon-post.png';
+				break;
+		}
+	}
 
 
     /**
      * Handle the Icon column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
-     * @return
+     * @return string <img> tag for proper icon for post type
      */
-    function column_icon( $item )
-    {
-        $icon = '';
+    function column_icon( $item ) {
+		$icon = '';
 
-        if( isset( $item['post_type'] ) )
+	    if ( ! isset( $item['post_type'] ) ) {
+			return $icon;
+		}
+
+	    $post_type = get_post_type_object( $item['post_type'] );
+
+	    if ( $post_type->hierarchical ) {
+		    $item['post_type'] = 'page';
+	    }
+
+	    switch ( $item['post_type'] ) {
+			case 'page':
+				$icon = '/images/' . 'icon-page.png';
+				break;
+			case 'post':
+				$icon = '/images/' . 'icon-post.png';
+				break;
+			default: // custom post type
+				$icon = '/images/' . 'icon-post.png';
+				break;
+	    }
+
+	    // allow for user-defined menu_icon
+	    $icon = ! empty( $post_type->menu_icon ) ? $post_type->menu_icon : $this->get_post_type_icon( $item['post_type' ]) ;
+
+
         {
             $post_type = get_post_type_object( $item['post_type'] );
 
@@ -121,7 +151,7 @@ class Hierarchy_Table extends WP_List_Table {
                         break;
                 }
 
-                $icon = HIERARCHY_URL . '/images/' . $icon;
+                $icon = $this->url . '/images/' . $icon;
             }
         }
 
@@ -132,13 +162,10 @@ class Hierarchy_Table extends WP_List_Table {
     /**
      * Handle the Title column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
-     * @return
+     * @return string   Proper title for the column
      */
-    function column_title( $item )
-    {
+    function column_title( $item ) {
         // build row actions
         $actions        = array();
         $item           = $item['entry'];
@@ -159,13 +186,10 @@ class Hierarchy_Table extends WP_List_Table {
         else
         {
             // it's a CPT index
-            $post_types = Hierarchy::get_post_types();
             $cpt = null;
-            foreach( $post_types as $post_type )
-            {
-                if( $post_type->name == $item['ID'] )
-                {
-                    $cpt = $post_type;
+            foreach( $this->post_types as $post_type ) {
+                if( $post_type == $item['ID'] )  {
+                    $cpt = get_post_type_object( $post_type );
                     break;
                 }
             }
@@ -218,7 +242,13 @@ class Hierarchy_Table extends WP_List_Table {
             $actions['add'] = '<a href="' . $add_url . '">Add New</a>';
 
             // let's see if we need to add any taxonomies
-            $taxonomies = Hierarchy::get_taxonomies_for_post_type( $cpt->name );
+	        $args       = array(
+		        'public'        => true,
+		        'object_type'   => array( $cpt->name )
+	        );
+	        $output     = 'objects';
+	        $operator   = 'and';
+	        $taxonomies = get_taxonomies( $args, $output, $operator );
 
             if( !empty( $taxonomies ) )
             {
@@ -237,9 +267,6 @@ class Hierarchy_Table extends WP_List_Table {
             }
         }
 
-
-
-
         // return the title contents
         $final_title = '<strong><a class="row-title" href="' . $edit_url . '">' . $title . '</a></strong>';
         if( $count ) $final_title .= $count_label;
@@ -252,19 +279,13 @@ class Hierarchy_Table extends WP_List_Table {
     /**
      * Handle the Comments column
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param $item
      * @return string
      */
-    function column_comments( $item )
-    {
+    function column_comments( $item ) {
         $item = $item['entry'];
-
         $column = '';
-
-        if( is_numeric( $item['ID'] ) ) // only if applicable
-        {
+        if ( is_numeric( $item['ID'] ) ) {
             $column = '<div class="post-com-count-wrapper"><a class="post-com-count" style="cursor:default;"><span class="comment-count">' . $item['comments'] . '</span></a></div>';
         }
 
@@ -275,8 +296,6 @@ class Hierarchy_Table extends WP_List_Table {
     /**
      * Preps the data for display in the table
      *
-     * @package WordPress
-     * @author Jonathan Christopher
      * @param array $cpts
      */
     function prepare_items( $hierarchy = null )

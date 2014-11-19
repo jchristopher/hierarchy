@@ -27,7 +27,7 @@
 
 if ( is_admin() ) {
 	require plugin_dir_path( __FILE__ ) . 'includes/class-hierarchy.php';
-	
+
 	$hierarchy = new Hierarchy();
 	$hierarchy->init();
 }

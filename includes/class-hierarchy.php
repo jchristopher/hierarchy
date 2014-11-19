@@ -157,6 +157,7 @@ class Hierarchy {
 		require_once $this->dir . 'includes/class-hierarchy-table-cpt.php';
 		require_once $this->dir . 'includes/class-hierarchy-settings.php';
 		require_once $this->dir . 'includes/class-hierarchy-i18n.php';
+		require_once $this->dir . 'includes/class-hierarchy-factory.php';
 	}
 
 	/**
@@ -377,5 +378,34 @@ class Hierarchy {
 		$this->add_menu_item();
 		$this->remove_admin_menu_items();
 	}
+
+	/**
+	 * Echo WP_List_Table for Hierarchy itself
+	 *
+	 * @since 0.6
+	 */
+	function show_hierarchy() {
+		$hierarchy_table = new Hierarchy_Table();
+		$hierarchy_table->set_url( $this->url );
+		$hierarchy_table->set_post_types( $this->post_types );
+
+		$hierarchy_factory = new Hierarchy_Factory();
+		$hierarchy = $hierarchy_factory->build();
+
+		$hierarchy_table->prepare_items( $hierarchy ); ?>
+		<div class="wrap">
+			<div id="icon-page" class="icon32"><br/></div>
+			<h2><?php echo __( 'Content', 'hierarchy' ); ?></h2>
+			<div id="iti-hierarchy-wrapper">
+				<form id="iti-hierarchy-form" method="get">
+					<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>" />
+					<?php $hierarchy_table->display() ?>
+				</form>
+			</div>
+			<style type="text/css">
+				#iti-hierarchy-wrapper .column-icon { width:38px; }
+			</style>
+		</div>
+	<?php }
 
 }

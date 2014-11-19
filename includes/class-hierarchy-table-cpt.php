@@ -20,13 +20,13 @@ class Hierarchy_Table_CPT extends WP_List_Table {
 	 */
 	private $prefix;
 
-    function __construct() {
-        parent::__construct( array(
-            'singular'  => 'hierarchycpt',
-            'plural'    => 'hierarchycpts',
-            'ajax'      => false
-        ) );
-    }
+	function __construct() {
+		parent::__construct( array(
+			'singular'  => 'hierarchycpt',
+			'plural'    => 'hierarchycpts',
+			'ajax'      => false
+		) );
+	}
 
 	/**
 	 * Setter for the settings fields prefix we need to use

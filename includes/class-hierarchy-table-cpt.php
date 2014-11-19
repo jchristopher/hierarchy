@@ -14,6 +14,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  **/
 class Hierarchy_Table_CPT extends WP_List_Table {
 
+	private $prefix;
+
     function __construct()
     {
         global $status, $page;
@@ -24,6 +26,10 @@ class Hierarchy_Table_CPT extends WP_List_Table {
                 'ajax'      => false
             ) );
     }
+
+	public function set_prefix( $prefix ) {
+		$this->prefix = $prefix;
+	}
 
 
     /**
@@ -94,7 +100,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
      */
     function column_order( $item )
     {
-        return '<input type="text" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][order]" value="' . $item['order'] . '" class="small-text" />';
+        return '<input type="text" name="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][order]" id="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][order]" value="' . $item['order'] . '" class="small-text" />';
     }
 
 
@@ -109,7 +115,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     function column_omit( $item )
     {
         $checked = $item['omit'] ? ' checked="checked"' : '';
-        return '<input type="checkbox" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][omit]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][omit]" value="1"' . $checked . ' />';
+        return '<input type="checkbox" name="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][omit]" id="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][omit]" value="1"' . $checked . ' />';
     }
 
 
@@ -124,7 +130,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     function column_entries( $item )
     {
         $checked = $item['entries'] ? ' checked="checked"' : '';
-        return '<input type="checkbox" name="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][entries]" id="' . HIERARCHY_PREFIX . 'settings[post_types][' . $item['name'] . '][entries]" value="1"' . $checked . ' />';
+        return '<input type="checkbox" name="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][entries]" id="' . $this->prefix . 'settings[post_types][' . $item['name'] . '][entries]" value="1"' . $checked . ' />';
     }
 
 

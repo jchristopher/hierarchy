@@ -8,18 +8,17 @@
  * @author Jonathan Christopher
  **/
 class Hierarchy {
-	private $dir;
-	private $url;
-	private $version;
-	private $plugin_name;
-	private $prefix;
-	private $settings;
-	private $post_types;
-	private $capability;
-	private $menu_position = 3;
+	protected $dir;
+	protected $url;
+	protected $version;
+	protected $plugin_name;
+	protected $prefix;
+	protected $settings;
+	protected $post_types;
+	protected $capability;
+	protected $menu_position = 3;
 
 	function __construct() {
-
 		$this->plugin_name = 'hierarchy';
 		$this->prefix = '_iti_hierarchy_';
 		$this->version = '0.6';
@@ -28,6 +27,18 @@ class Hierarchy {
 		$this->capability = apply_filters( 'hierarchy_capability', 'manage_options' );
 		$this->post_types = $this->get_post_types();
 
+		if ( ! $this->settings = get_option( $this->prefix . 'settings' ) ) {
+			$this->settings = array(
+				'per_page' => -1,
+				'version' => $this->version,
+				'hidden_from_admin_menu' => array()
+			);
+
+			add_option( $this->prefix . 'settings', $this->settings, '', 'no' );
+		}
+	}
+
+	function init() {
 		$this->load_dependencies();
 		$this->init_settings();
 		$this->set_locale();
@@ -43,21 +54,8 @@ class Hierarchy {
 	}
 
 	function init_settings() {
-
 		$settings = new Hierarchy_Settings();
-		$settings->set_prefix( $this->prefix );
-		$settings->set_version( $this->version );
-
-		if ( ! $this->settings = get_option( $this->prefix . 'settings' ) ) {
-			$this->settings = array(
-				'per_page' => -1,
-				'version' => $this->version,
-				'hidden_from_admin_menu' => array()
-			);
-
-			add_option( $this->prefix . 'settings', $this->settings, '', 'no' );
-		}
-
+		$settings->init();
 	}
 
 	public function get_plugin_name() {
@@ -77,15 +75,9 @@ class Hierarchy {
 	}
 
 	function add_hooks() {
-		add_action( 'admin_menu', array( $this, 'assets' ) );
 		add_action( 'admin_menu', array( $this, 'hijack_admin_menu' ) );
 
 		add_filter( 'plugin_row_meta',  array( 'Hierarchy', 'filter_plugin_row_meta' ), 10, 2 );
-	}
-
-	function assets() {
-		// add options menu under Appearance
-		add_options_page( __( 'Hierarchy', 'hierarchy' ), __( 'Hierarchy', 'hierarchy' ), $this->capability, __FILE__, array( $this, 'admin_settings' ) );
 	}
 
 	function set_menu_position() {
@@ -122,7 +114,19 @@ class Hierarchy {
 	}
 
 	function get_menu_slug_from_post_type( $post_type ) {
-		return 'post' == $post_type ? 'edit.php' : 'edit.php?post_type=' . $post_type;
+
+		switch ( $post_type ) {
+			case 'post':
+				$slug = 'edit.php';
+				break;
+			case 'attachment':
+				$slug = 'upload.php';
+				break;
+			default:
+				$slug = 'edit.php?post_type=' . $post_type;
+		}
+
+		return $slug;
 	}
 
 	function maybe_skip_menu_removal( $post_type ) {
@@ -200,12 +204,12 @@ class Hierarchy {
 
 		foreach ( $post_types_to_hide as $post_type_to_hide ) {
 
-			$menu_slug = $this->get_menu_slug_from_post_type( $post_type_to_hide->name );
+			$menu_slug = $this->get_menu_slug_from_post_type( $post_type_to_hide );
 
 			// if (right now) we're editing a post type that was hidden from the Admin menu
 			// let's leave the menu links in place for convenience
-			if ( $this->maybe_skip_menu_removal( $post_type_to_hide->name ) ) {
-				$this->make_admin_menu_item_contextual( $post_type_to_hide->name );
+			if ( $this->maybe_skip_menu_removal( $post_type_to_hide ) ) {
+				$this->make_admin_menu_item_contextual( $post_type_to_hide );
 				continue;
 			}
 

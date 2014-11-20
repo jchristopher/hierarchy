@@ -3,6 +3,14 @@
 class Hierarchy_Factory extends Hierarchy {
 
 	/**
+	 * Post types
+	 *
+	 * @since 0.6
+	 * @var array
+	 */
+	protected $post_types = array();
+
+	/**
 	 * Everything is based on the Pages so they must be stored
 	 *
 	 * @since 0.6
@@ -58,16 +66,16 @@ class Hierarchy_Factory extends Hierarchy {
 
 			// handle all post types
 			foreach( $this->post_types as $post_type ) {
-				$this->process_post_type( $post_type, $this->context );
+				if ( 'page' !== $post_type ) {
+					$this->process_post_type($post_type, $this->context);
+				}
 			}
 		}
 
 		// append any orphaned post types
 		if ( ! empty( $this->post_types ) ) {
-			return $this->hierarchy;
+			$this->clean_up_post_types();
 		}
-
-		$this->clean_up_post_types();
 
 		return $this->hierarchy;
 
@@ -82,7 +90,7 @@ class Hierarchy_Factory extends Hierarchy {
 	function clean_up_post_types() {
 		foreach ( $this->post_types as $post_type ) {
 
-			if ( $post_type->name == 'page' || ! empty( $this->settings['post_types'][$post_type->name]['omit'] ) ) {
+			if ( $post_type == 'page' || ! empty( $this->settings['post_types'][ $post_type ]['omit'] ) ) {
 				continue;
 			}
 
@@ -118,8 +126,6 @@ class Hierarchy_Factory extends Hierarchy {
 	 * @return string
 	 */
 	function inject_post_type( $post_type, $target_parent_id ) {
-
-		global $wp_rewrite;
 
 		// build the CPT Hierarchy entry
 		$order = ! empty( $settings['post_types'][ $post_type ]['order'] ) ? intval( $settings['post_types'][ $post_type ]['order'] ) : 0;
@@ -261,7 +267,7 @@ class Hierarchy_Factory extends Hierarchy {
 
 		// break things up into URI segments and remove empty segments
 		$cpt_archive_slug_segments = explode( '/', trim( $slug ) );
-		$cpt_archive_slug_segments = array_filter( 'strlen', $cpt_archive_slug_segments );
+		$cpt_archive_slug_segments = array_filter( $cpt_archive_slug_segments, 'strlen' );
 
 		// the last two segments represent the CPT archive & the slug, we need everything before that
 		// if the array length isn't > 2 there is no possible parent
@@ -329,30 +335,31 @@ class Hierarchy_Factory extends Hierarchy {
 	 * @param $new_entry array  Hierarchy entry
 	 */
 	function inject_entry( $new_entry ) {
-		$i = 0;
-		$target_index = -1;
+		$order          = intval( $new_entry['order'] );
+		$last_index     = 0;
+		$target_index   = -1;
 
-		// determine where we need to inject
-		foreach( $this->hierarchy as $hierarchy_entry ) {
-			if (
-				isset( $hierarchy_entry['parent'] )
-				&& $new_entry['parent'] == $hierarchy_entry['parent']
-				&& 'page' == $hierarchy_entry['post_type']
-				&& absint( $new_entry['order'] ) < absint( $hierarchy_entry['parent'] )
-			) {
-				// hit a ceiling
-				$target_index = $i;
-				break;
+		// loop through and find out where we need to insert
+		for ( $i = 0; $i < count( $this->hierarchy ); $i++ ) {
+			if ( isset( $this->hierarchy[$i]['parent'] ) && $this->hierarchy[$i]['parent'] == $new_entry['parent'] ) {
+				if ( $this->hierarchy[$i]['post_type'] == 'page' ) { // otherwise we might inject within CTP entries
+					// we only want to proceed when we're working with the first level
+					$last_index = $i;
+					if ( $order < intval( $this->hierarchy[$i]['order'] ) ) {
+						// we've hit a ceiling
+						$target_index = $last_index;
+						break;
+					}
+				}
 			}
-			$i++;
 		}
 
-		if ( -1 == $target_index ) {
-			// last item in the Hierarchy
-			$target_index = count( $this->hierarchy );
+		// we might be dealing with the last entry
+		if( $target_index === -1 ) {
+			$target_index = count($this->hierarchy);
 		}
 
-		// insert our new entry in the appropriate place
+		// we'll insert our new entry in the appropriate place
 		array_splice( $this->hierarchy, $target_index, 0, array( $new_entry ) );
 	}
 
@@ -393,7 +400,7 @@ class Hierarchy_Factory extends Hierarchy {
 	 */
 	function get_pad_count( $post ) {
 		$level = 0;
-		$post_parent = absint( $post->post_parent );
+		$post_parent = isset( $post->post_parent ) ? absint( $post->post_parent ) : 0;
 
 		// if there's no parent there's no more to do
 		if ( $post_parent < 1 ) {
@@ -463,6 +470,10 @@ class Hierarchy_Factory extends Hierarchy {
 		}
 
 		return $posts;
+	}
+
+	function set_post_types( $post_types ) {
+		$this->post_types = $post_types;
 	}
 
 }

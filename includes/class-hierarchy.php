@@ -88,7 +88,6 @@ class Hierarchy {
 		$this->dir = plugin_dir_path( dirname( __FILE__ ) );
 		$this->url = plugins_url( 'hierarchy', $this->dir );
 		$this->capability = apply_filters( 'hierarchy_capability', 'manage_options' );
-		$this->post_types = $this->get_post_types();
 
 		if ( ! $this->settings = get_option( $this->prefix . 'settings' ) ) {
 			$this->settings = array(
@@ -176,8 +175,35 @@ class Hierarchy {
 	 * @since 0.6
 	 */
 	function add_hooks() {
-		add_action( 'admin_menu', array( $this, 'hijack_admin_menu' ) );
-		add_filter( 'plugin_row_meta',  array( 'Hierarchy', 'filter_plugin_row_meta' ), 10, 2 );
+		add_action( 'admin_menu', array( $this, 'hijack_admin_menu' ), 99999 );
+		add_action( 'admin_init', array( $this, 'retrieve_post_types' ), 999 );
+
+		add_filter( 'plugin_row_meta',  array( $this, 'filter_plugin_row_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Callback to retrieve and store all registered post types
+	 *
+	 * @since 0.6
+	 */
+	function retrieve_post_types() {
+		$this->post_types = $this->get_post_types();
+	}
+
+	/**
+	 * Add link to meta row for plugin
+	 *
+	 * @since 0.6
+	 * @param $plugin_meta
+	 * @param $plugin_file
+	 * @return mixed
+	 */
+	function filter_plugin_row_meta( $plugin_meta, $plugin_file ) {
+		if ( strstr( $plugin_file, 'hierarchy' ) ) {
+			$plugin_meta[3] = 'Courtesy of <a title="Iron to Iron" href="http://irontoiron.com/">Iron to Iron</a>';
+		}
+
+		return $plugin_meta;
 	}
 
 	/**
@@ -345,6 +371,8 @@ class Hierarchy {
 	 */
 	function remove_admin_menu_items() {
 
+		$this->retrieve_post_types();
+
 		if ( ! is_array( $this->post_types ) ) {
 			return;
 		}
@@ -373,8 +401,6 @@ class Hierarchy {
 	 * @since 0.6
 	 */
 	function hijack_admin_menu() {
-		global $menu;
-
 		$this->add_menu_item();
 		$this->remove_admin_menu_items();
 	}
@@ -385,11 +411,14 @@ class Hierarchy {
 	 * @since 0.6
 	 */
 	function show_hierarchy() {
+		$this->retrieve_post_types();
+
 		$hierarchy_table = new Hierarchy_Table();
 		$hierarchy_table->set_url( $this->url );
 		$hierarchy_table->set_post_types( $this->post_types );
 
 		$hierarchy_factory = new Hierarchy_Factory();
+		$hierarchy_factory->set_post_types( $this->post_types );
 		$hierarchy = $hierarchy_factory->build();
 
 		$hierarchy_table->prepare_items( $hierarchy ); ?>
@@ -403,7 +432,9 @@ class Hierarchy {
 				</form>
 			</div>
 			<style type="text/css">
-				#iti-hierarchy-wrapper .column-icon { width:38px; }
+				.tablenav { display:none; }
+				#iti-hierarchy-wrapper { padding-top:1em; }
+				#iti-hierarchy-wrapper .column-icon { width:1em; text-align:center; }
 			</style>
 		</div>
 	<?php }

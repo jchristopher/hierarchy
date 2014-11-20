@@ -3,6 +3,8 @@
 
 class Hierarchy_Settings extends Hierarchy {
 
+	protected $post_types = array();
+
 	/**
 	 * Post types with Hierarchy-specific keys of metadata
 	 *
@@ -235,11 +237,13 @@ class Hierarchy_Settings extends Hierarchy {
 	 * @since 0.6
 	 */
 	function display_edit_cpt_placement() {
+		$this->retrieve_post_types();
 		$this->prepare_post_types();
 
 		// build the WP_List_table
 		$post_types_table = new Hierarchy_Table_CPT();
 		$post_types_table->set_prefix( $this->prefix );
+		$post_types_table->set_post_types( $this->post_types );
 		$post_types_table->prepare_items( $this->post_types_formatted );
 
 		// output the table

@@ -38,6 +38,10 @@ class Hierarchy_Table_CPT extends WP_List_Table {
 		$this->prefix = $prefix;
 	}
 
+	public function set_post_types( $post_types ) {
+		$this->post_types = $post_types;
+	}
+
 
     /**
      * Default column handler if there's no specific handler

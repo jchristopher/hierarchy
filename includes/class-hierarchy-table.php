@@ -72,18 +72,28 @@ class Hierarchy_Table extends WP_List_Table {
 		return $columns;
     }
 
+	/**
+	 * Get the Dashicon for a post type
+	 *
+	 * @since 0.6
+	 * @param $post_type
+	 * @return string
+	 */
 	function get_post_type_icon( $post_type ) {
-		switch ( $post_type ) {
+		$icon = '<span class="dashicons dashicons-admin-post"></span>';
+
+		switch ( $post_type->name ) {
 			case 'page':
-				$icon = '/images/' . 'icon-page.png';
-				break;
-			case 'post':
-				$icon = '/images/' . 'icon-post.png';
+				$icon = '<span class="dashicons dashicons-admin-page"></span>';
 				break;
 			default: // custom post type
-				$icon = '/images/' . 'icon-post.png';
+				if ( false !== strpos( $post_type->menu_icon, 'dashicons' ) )  {
+					$icon = '<span class="dashicons ' . esc_attr( $post_type->menu_icon ) . '"></span>';
+				}
 				break;
 		}
+
+		return $icon;
 	}
 
 
@@ -91,71 +101,18 @@ class Hierarchy_Table extends WP_List_Table {
      * Handle the Icon column
      *
      * @param $item
-     * @return string <img> tag for proper icon for post type
+     * @return string  HTML for Dashicon for post type
      */
     function column_icon( $item ) {
-		$icon = '';
 
 	    if ( ! isset( $item['post_type'] ) ) {
-			return $icon;
+		    $item['post_type'] = 'post';
 		}
 
 	    $post_type = get_post_type_object( $item['post_type'] );
+		$icon = $this->get_post_type_icon( $post_type );
 
-	    if ( $post_type->hierarchical ) {
-		    $item['post_type'] = 'page';
-	    }
-
-	    switch ( $item['post_type'] ) {
-			case 'page':
-				$icon = '/images/' . 'icon-page.png';
-				break;
-			case 'post':
-				$icon = '/images/' . 'icon-post.png';
-				break;
-			default: // custom post type
-				$icon = '/images/' . 'icon-post.png';
-				break;
-	    }
-
-	    // allow for user-defined menu_icon
-	    $icon = ! empty( $post_type->menu_icon ) ? $post_type->menu_icon : $this->get_post_type_icon( $item['post_type' ]) ;
-
-
-        {
-            $post_type = get_post_type_object( $item['post_type'] );
-
-            // if we have a hierarchical post_type we'll want to use the Page icon instead of the Post icon
-            if( $post_type->hierarchical )
-                $item['post_type'] = 'page';
-
-            if( !empty( $post_type->menu_icon ) )
-            {
-                // we'll use the user-defined menu_icon if possible
-                $icon = $post_type->menu_icon;
-            }
-            else
-            {
-                switch( $item['post_type'] )
-                {
-                    case 'page':
-                        $icon = 'icon-page.png';
-                        break;
-
-                    case 'post':
-                        $icon = 'icon-post.png';
-                        break;
-
-                    default: // custom post type
-                        $icon = 'icon-post.png';
-                        break;
-                }
-
-                $icon = $this->url . '/images/' . $icon;
-            }
-        }
-
-        return '<img src="' . $icon . '" alt="Post icon" />';
+        return $icon;
     }
 
 

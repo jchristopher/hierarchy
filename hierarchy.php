@@ -6,6 +6,7 @@
  Version: 0.6
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
+ Text Domain: hierarchy
 */
 
 /*  Copyright 2012-2014 Jonathan Christopher (email : jonathan@irontoiron.com)

@@ -461,7 +461,12 @@ class Hierarchy {
 		?>
 		<div class="wrap">
 			<div id="icon-page" class="icon32"><br/></div>
-			<h2><?php echo esc_html( $page_title ); ?></h2>
+			<h2>
+				<?php echo esc_html( $page_title ); ?>
+				<?php if ( apply_filters( 'hierarchy_add_new_page_button', true ) ) : ?>
+				<a href="<?php echo admin_url( 'post-new.php?post_type=page' ); ?>" class="add-new-h2"><?php _e( 'Add New Page', 'hierarchy' ); ?></a>
+				<?php endif; ?>
+			</h2>
 			<div id="iti-hierarchy-wrapper">
 				<form id="iti-hierarchy-form" method="get">
 					<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>" />

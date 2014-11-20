@@ -38,7 +38,7 @@ It's also likely that you're utilizing Custom Post Types to power sections of yo
 
 ###### Contextual links are included with each row in Hierarchy:
 
-![Contextual links are included with each row in Hierarchy](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-5.png)
+![Contextual links are included with each row in Hierarchy](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-7.png)
 
 #### More information
 

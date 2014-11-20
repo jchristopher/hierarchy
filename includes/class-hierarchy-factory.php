@@ -112,9 +112,53 @@ class Hierarchy_Factory extends Hierarchy {
 				'parent'    => 0,
 			);
 
-			$this->inject_entry( $post_type_entry );
-
+			$target_index = $this->inject_entry( $post_type_entry );
+			if ( 'page' !== $post_type && ! empty( $this->settings['post_types'][ $post_type ]['entries'] ) ) {
+				$this->process_standalone_post_type_posts( $post_type, $target_index );
+			}
 		}
+	}
+
+
+	function process_standalone_post_type_posts( $post_type, $target_index ) {
+
+		$post_type_obj = get_post_type_object( $post_type );
+		$cpt_posts = $post_type_obj->hierarchical ? $this->get_post_type_posts( $post_type, true ) : $this->get_post_type_posts( $post_type );
+
+		if ( empty( $cpt_posts ) ) {
+			return;
+		}
+
+		$cpt_posts_hierarchy = array();
+
+		// the target index will be the post type anchor
+		$target_index = intval( $target_index ) + 1;
+		$pad = '&#8212; ';  // single pad level because this is a standalone CPT
+
+		foreach ( $cpt_posts as $cpt_post ) {
+			$cpt_post = get_post( absint( $cpt_post['ID'] ) );
+			$author = get_userdata( $cpt_post->post_author );
+
+			$cpt_posts_hierarchy[] = array(
+				'entry'     => array(
+					'ID'        => $cpt_post->ID,
+					'post_type' => $cpt_post->post_type,
+					'pad'       => $pad,
+					'title'     => $pad . $cpt_post->post_title,
+					'author'    => $author->display_name,
+					'comments'  => $cpt_post->comment_count,
+					'date'      => date( get_option( 'date_format' ), strtotime( $cpt_post->post_date ) ),
+					'order'     => $cpt_post->menu_order,
+					'parent'    => $cpt_post->post_parent != 0 ? $cpt_post->post_parent : $post_type,
+				),
+				'order'     => $cpt_post->menu_order,
+				'post_type' => $cpt_post->post_type,
+				'parent'    => $cpt_post->post_parent != 0 ? $cpt_post->post_parent : $post_type,
+			);
+		}
+
+		// inject the posts into the Hierarchy at the proper index
+		array_splice( $this->hierarchy, $target_index, 0, $cpt_posts_hierarchy );
 	}
 
 	/**
@@ -333,9 +377,27 @@ class Hierarchy_Factory extends Hierarchy {
 	 *
 	 * @since 1.0
 	 * @param $new_entry array  Hierarchy entry
-	 * @todo refactor
+	 * @return int  The index used to inject this entry
 	 */
 	function inject_entry( $new_entry ) {
+		$target_index = $this->discover_target_index( $new_entry );
+
+		// we'll insert our new entry in the appropriate place
+		array_splice( $this->hierarchy, $target_index, 0, array( $new_entry ) );
+
+		return $target_index;
+	}
+
+	/**
+	 * Determine where this entry should be injected based on the new entry order
+	 *
+	 * @since 1.0.2
+	 * @param $new_entry    Hierarchy row array
+	 * @return int          The target index
+	 *
+	 * @todo refactor
+	 */
+	function discover_target_index( $new_entry ) {
 		$order          = intval( $new_entry['order'] );
 		$last_index     = 0;
 		$target_index   = -1;
@@ -360,8 +422,7 @@ class Hierarchy_Factory extends Hierarchy {
 			$target_index = count($this->hierarchy);
 		}
 
-		// we'll insert our new entry in the appropriate place
-		array_splice( $this->hierarchy, $target_index, 0, array( $new_entry ) );
+		return $target_index;
 	}
 
 	/**

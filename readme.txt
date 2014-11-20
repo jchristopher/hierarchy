@@ -14,6 +14,10 @@ Move your Pages/Posts/Custom Post Type admin links from the sidebar to a Content
 
 Custom Post Types (sometimes) need context, Hierarchy allows you to rework your content management workflow by essentially **moving Custom Post Type admin menus into your Pages list**. What this does is mimic the navigation you've set up on your site by placing Custom Post Type edit links amongst your Pages where they belong.
 
+[**&raquo; Check out the screenshots to see Hierarchy in action**](https://wordpress.org/plugins/hierarchy/screenshots/)
+
+Hierarchy removes unnecessary entries from the Admin Menu and instead injects theme where appropriate amongst your Pages, grouping everything under a single 'Content' Admin Menu entry.
+
 = Custom Post Types NEED context =
 
 Custom Post Types are great, but the **editing workflow can be improved**. Adding a Custom Post Type likely results in *another* WordPress admin sidebar menu, abstracting the management of that content from the main organization of your site, Pages. Hierarchy intelligently extends your Pages menu by including your Custom Post Type admin links *within* the Page structure, allowing for a much more natural workflow when managing your content.

@@ -52,6 +52,9 @@ If you'd like a lot more information on the implementation and workflow changes 
 
 #### Changelog
 
+**1.0.1**
+* Fixed a false positive that would incorrectly output post type entires
+
 **1.0**
 * Complete refactor: reorganization, optimization, PHP Warning cleanup
 * Bumped minimum WordPress version support to 3.8

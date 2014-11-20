@@ -4,7 +4,7 @@ Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,10 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 5. Contextual links are included with each row in Hierarchy
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed a false positive that would incorrectly output post type entires
+* Clean up .org repo (deploy script didn't remove legacy files)
 
 = 1.0 =
 * Complete refactor: reorganization, optimization, PHP Warning cleanup

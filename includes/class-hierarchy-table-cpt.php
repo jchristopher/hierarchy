@@ -147,10 +147,10 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     function prepare_items( $cpts = array() ) {
 
         // define our column headers
-        $columns                = $this->get_columns();
-        $hidden                 = array();
-        $sortable               = $this->get_sortable_columns();
-        $this->_column_headers  = array( $columns, $hidden, $sortable ); // actually set the data
+        $columns = $this->get_columns();
+        $hidden = array();
+        $sortable = $this->get_sortable_columns();
+        $this->_column_headers = array( $columns, $hidden, $sortable ); // actually set the data
 
         // define our data to be shown
         $data = $cpts;

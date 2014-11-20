@@ -6,7 +6,7 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @since      1.0.0
+ * @since      1.0
  * @package    Hierarchy
  * @subpackage Hierarchy/includes
  * @author     Jonathan Christopher <jonathan@mondaybynoon.com>
@@ -16,7 +16,7 @@ class Hierarchy_i18n {
 	/**
 	 * The domain specified for this plugin.
 	 *
-	 * @since    1.0.0
+	 * @since    1.0
 	 * @access   private
 	 * @var      string    $domain    The domain identifier for this plugin.
 	 */
@@ -25,7 +25,7 @@ class Hierarchy_i18n {
 	/**
 	 * Load the plugin text domain for translation.
 	 *
-	 * @since    1.0.0
+	 * @since    1.0
 	 */
 	public function load_plugin_textdomain() {
 
@@ -40,7 +40,7 @@ class Hierarchy_i18n {
 	/**
 	 * Set the domain equal to that of the specified domain.
 	 *
-	 * @since    1.0.0
+	 * @since    1.0
 	 * @param    string    $domain    The domain that represents the locale of this plugin.
 	 */
 	public function set_domain( $domain ) {

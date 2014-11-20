@@ -1,8 +1,13 @@
 <?php
 
-
 class Hierarchy_Settings extends Hierarchy {
 
+	/**
+	 * Registered post types
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
 	protected $post_types = array();
 
 	/**

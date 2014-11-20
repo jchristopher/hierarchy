@@ -355,7 +355,7 @@ class Hierarchy {
 
 		// remove the original Admin Menu entry because we're moving it up top and we
 		// don't want a dupe in the original location
-		$menu_slug = $this->get_menu_slug_from_post_type( $post_type->name );
+		$menu_slug = $this->get_menu_slug_from_post_type( $post_type );
 		remove_menu_page( $menu_slug );
 
 		$this->inject_placeholder_admin_menu_item();
@@ -392,6 +392,13 @@ class Hierarchy {
 
 			remove_menu_page( $menu_slug );
 
+		}
+
+		// also remove 'Add New' submenu items for post types set as 'no_new'
+		foreach ( $this->settings['post_types'] as $post_type => $post_type_settings ) {
+			if ( ! empty( $post_type_settings['no_new'] ) ) {
+				remove_submenu_page( 'edit.php?post_type=' . $post_type, 'post-new.php?post_type=' . $post_type );
+			}
 		}
 	}
 

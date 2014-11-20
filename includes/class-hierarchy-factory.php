@@ -252,7 +252,7 @@ class Hierarchy_Factory extends Hierarchy {
 		}
 
 		// append the CPT hierarchy to Hierarchy
-		array_merge( $this->hierarchy, $cpt_posts_hierarchy );
+		$this->hierarchy = array_merge( $this->hierarchy, $cpt_posts_hierarchy );
 	}
 
 	/**
@@ -449,7 +449,7 @@ class Hierarchy_Factory extends Hierarchy {
 			$args['sort_column'] = 'menu_order, post_title';
 		}
 
-		$base = get_pages( $args );
+		$base = $hierarchical ? get_pages( $args ) : get_posts( $args );
 
 		if ( empty( $base ) ) {
 			return $posts;

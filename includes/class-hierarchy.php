@@ -177,8 +177,27 @@ class Hierarchy {
 	function add_hooks() {
 		add_action( 'admin_menu', array( $this, 'hijack_admin_menu' ), 99999 );
 		add_action( 'admin_init', array( $this, 'retrieve_post_types' ), 999 );
+		add_action( 'admin_head', array( $this, 'maybe_hide_add_new_button' ) ) ;
 
 		add_filter( 'plugin_row_meta',  array( $this, 'filter_plugin_row_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Hide the 'Add New' button for post types where 'Prevent New' is enabled
+	 *
+	 * @since 0.6
+	 */
+	function maybe_hide_add_new_button() {
+		$screen = get_current_screen();
+		foreach ( $this->settings['post_types'] as $post_type => $post_type_settings ) {
+			if ( 'edit-' . $post_type == $screen->id && ! empty( $post_type_settings['no_new'] ) ) {
+				?>
+					<style type="text/css">
+						.add-new-h2 { display:none; }
+					</style>
+				<?php
+			}
+		}
 	}
 
 	/**

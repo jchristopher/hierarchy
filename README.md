@@ -52,6 +52,10 @@ If you'd like a lot more information on the implementation and workflow changes 
 
 #### Changelog
 
+**1.0.2**
+* Fixed an issue where pagination wasn't displaying properly
+* Fixed an issue where standalone (e.g. not 'child') CPT entries were not properly output
+
 **1.0.1**
 * Fixed a false positive that would incorrectly output post type entires
 

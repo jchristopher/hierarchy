@@ -1,0 +1,3 @@
+<?php
+
+// silcence is golden

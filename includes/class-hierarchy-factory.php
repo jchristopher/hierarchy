@@ -200,7 +200,7 @@ class Hierarchy_Factory extends Hierarchy {
 		$this->inject_post_type( $post_type, $target_parent_id );
 
 		// maybe inject post type entries as well
-		if ( empty( $this->settings['post_types'][ $post_type ]['entries'] ) ) {
+		if ( ! empty( $this->settings['post_types'][ $post_type ]['entries'] ) ) {
 			$base_pad = $this->determine_base_pad_for_post_type( $post_type, $target_parent_id );
 			$this->process_post_type_posts( $post_type, $base_pad );
 		}

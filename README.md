@@ -18,9 +18,31 @@ Chances are you've customized your `Front page displays` setting to display a st
 
 It's also likely that you're utilizing Custom Post Types to power sections of your website, but it's awkward to manage the content of an internal section of your website using the main WordPress admin sidebar links to your Custom Post Type. Hierarchy will allow you to hide those sidebar links and instead nest them amongst your Pages, providing contextual links to manage the content of your Custom Post Types.
 
+#### Screenshots
+
+###### A typical WordPress site with multiple CPTs:
+
+![A typical WordPress site with multiple CPTs](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-1.png)
+
+###### Pages are set up to establish structure for the site, but editing CPTs is disjointed:
+
+![The Page structure](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-2.png)
+
+###### Hierarchy integrates CPT edit links within your Pages and hides them from the Admin Menu:
+
+![Hierarchy integrates CPT edit links within your Pages and hides them from the Admin Menu](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-4.png)
+
+###### Hierarchy settings:
+
+![Hierarchy settings](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-5.png)
+
+###### Contextual links are included with each row in Hierarchy:
+
+![Contextual links are included with each row in Hierarchy](https://mondaybynoon.com/wp-content/uploads/2014/11/hierarchy-1.0-5.png)
+
 #### More information
 
-If you'd like a lot more information on the implementation and workflow changes please see [the detailed introduction](https://mondaybynoon.com/introducing-hierarchy/).
+If you'd like a lot more information on the implementation and workflow changes please see [the detailed introduction](https://mondaybynoon.com/introducing-hierarchy/) and [the follow-up for 1.0](https://mondaybynoon.com/hierarchy-1-0-is-here/).
 
 ## Installation
 

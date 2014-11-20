@@ -194,13 +194,15 @@ class Hierarchy {
 	 */
 	function maybe_hide_add_new_button() {
 		$screen = get_current_screen();
-		foreach ( $this->settings['post_types'] as $post_type => $post_type_settings ) {
-			if ( 'edit-' . $post_type == $screen->id && ! empty( $post_type_settings['no_new'] ) ) {
-				?>
-					<style type="text/css">
-						.add-new-h2 { display:none; }
-					</style>
-				<?php
+		if ( isset( $this->settings['post_types'] ) && is_array( $this->settings['post_types'] ) ) {
+			foreach ( $this->settings['post_types'] as $post_type => $post_type_settings ) {
+				if ( 'edit-' . $post_type == $screen->id && ! empty( $post_type_settings['no_new'] ) ) {
+					?>
+						<style type="text/css">
+							.add-new-h2 { display:none; }
+						</style>
+					<?php
+				}
 			}
 		}
 	}
@@ -417,9 +419,11 @@ class Hierarchy {
 		}
 
 		// also remove 'Add New' submenu items for post types set as 'no_new'
-		foreach ( $this->settings['post_types'] as $post_type => $post_type_settings ) {
-			if ( ! empty( $post_type_settings['no_new'] ) ) {
-				remove_submenu_page( 'edit.php?post_type=' . $post_type, 'post-new.php?post_type=' . $post_type );
+		if ( isset( $this->settings['post_types'] ) && is_array( $this->settings['post_types'] ) ) {
+			foreach ( $this->settings['post_types'] as $post_type => $post_type_settings ) {
+				if ( ! empty( $post_type_settings['no_new'] ) ) {
+					remove_submenu_page( 'edit.php?post_type=' . $post_type, 'post-new.php?post_type=' . $post_type );
+				}
 			}
 		}
 	}

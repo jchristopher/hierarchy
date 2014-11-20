@@ -478,8 +478,7 @@ class Hierarchy {
 				</form>
 			</div>
 			<style type="text/css">
-				.tablenav { display:none; }
-				#iti-hierarchy-wrapper { padding-top:1em; }
+				#iti-hierarchy-wrapper { margin-top:-2em; }
 				#iti-hierarchy-wrapper .column-icon { width:1em; text-align:center; }
 			</style>
 		</div>

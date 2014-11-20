@@ -26,7 +26,7 @@ It's also likely that you're utilizing Custom Post Types to power sections of yo
 
 = More information =
 
-If you'd like a lot more information on the implementation and workflow changes, [check out the screenshots](http://wordpress.org/plugins/hierarchy/screenshots/) and please see [the introduction](https://mondaybynoon.com/introducing-hierarchy/).
+If you'd like a lot more information on the implementation and workflow changes, [check out the screenshots](http://wordpress.org/plugins/hierarchy/screenshots/) and please see [the introduction](https://mondaybynoon.com/introducing-hierarchy/) and [the follow-up for 1.0](https://mondaybynoon.com/hierarchy-1-0-is-here/).
 
 == Installation ==
 
@@ -44,9 +44,11 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 
 == Screenshots ==
 
-1. Multiple native Custom Post Types
-2. Same site with Hierarchy activated and Custom Post Type entries disabled in the navigation
-3. Hierarchy Settings
+1. A typical WordPress site with multiple CPTs
+2. Pages are set up to establish structure for the site, but editing CPTs is disjointed
+3. Hierarchy integrates CPT edit links within your Pages and hides them from the Admin Menu
+4. Hierarchy settings
+5. Contextual links are included with each row in Hierarchy
 
 == Changelog ==
 

@@ -5,7 +5,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Post types
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @var array
 	 */
 	protected $post_types = array();
@@ -13,7 +13,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Everything is based on the Pages so they must be stored
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @var array   Page post objects
 	 */
 	private $pages = array();
@@ -21,7 +21,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Hierarchy's hierarchy
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @var array   Hierarchy's hierarchy (so meta!)
 	 */
 	private $hierarchy = array();
@@ -29,7 +29,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * The post ID of the page set to be the hub for Posts
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @var int     The post ID of the page set to be the hub for Posts
 	 */
 	private $posts_page;
@@ -37,7 +37,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * The current post object to work with
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @var object  The current post object to work with
 	 */
 	private $context;
@@ -45,7 +45,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Build the Hierarchy array
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 */
 	function build() {
 
@@ -85,7 +85,7 @@ class Hierarchy_Factory extends Hierarchy {
 	 * Take care of any post types that may have been omitted from settings (e.g. added after settings save) by
 	 * appending them to the bottom of the Hierarchy
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 */
 	function clean_up_post_types() {
 		foreach ( $this->post_types as $post_type ) {
@@ -120,9 +120,9 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Inject a post type into the Hierarchy
 	 *
-	 * @since 0.6
-	 * @param $post_type string     The post type to inject
-	 * @param $target_parent_id     The parent in the Hierarchy
+	 * @since 1.0
+	 * @param $post_type string         The post type to inject
+	 * @param $target_parent_id int     The parent in the Hierarchy
 	 * @return string
 	 */
 	function inject_post_type( $post_type, $target_parent_id ) {
@@ -154,10 +154,10 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Build a base pad out of a post type and target parent post ID
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post_type string         The post type
 	 * @param $target_parent_id string  The parent post ID
-	 * @return string                   The pad iself
+	 * @return string                   The pad itself
 	 */
 	function determine_base_pad_for_post_type( $post_type, $target_parent_id ) {
 		global $wp_rewrite;
@@ -172,7 +172,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Inject a post type into the Hierarchy
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post_type string     The post type to process
 	 */
 	function process_post_type( $post_type ) {
@@ -213,7 +213,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Process the posts for a post type and potentially inject them into the Hierarchy
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post_type string     The post type to process
 	 * @param $base_pad string      The base pad for the post type
 	 */
@@ -258,7 +258,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Determine a post id from a child slug
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $slug string  The slug to check against
 	 * @return int          The parent post ID
 	 */
@@ -285,7 +285,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Properly decipher a parent ID from a custom slug front
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $parent_id int        Parent post ID
 	 * @param $post_type string     Post type
 	 * @return int                  Parent post ID
@@ -306,7 +306,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * If a CPT is using a Page slug as an archive, properly retrieve that parent post ID
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $parent_id int        Post ID
 	 * @param $post_type string     Post type
 	 * @return int                  Parent post ID
@@ -331,8 +331,9 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Inject an entry into the Hierarchy
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $new_entry array  Hierarchy entry
+	 * @todo refactor
 	 */
 	function inject_entry( $new_entry ) {
 		$order          = intval( $new_entry['order'] );
@@ -366,7 +367,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Generate a Hierarchy entry array
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post WP_Post         Post object
 	 * @param $post_type string     Post type
 	 * @return array                Formatted Hierarchy entry array
@@ -383,7 +384,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Generate a Hierarchy entry array for a Page
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post WP_Post     WordPress Page
 	 * @return array            Formatted Hierarchy array
 	 */
@@ -394,7 +395,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Determine the pad count for a Hierarchy entry
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post WP_Post     Post object
 	 * @return int              How many levels deep we are
 	 */
@@ -419,7 +420,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Build a pad out of the pad count
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param $post WP_Post     The post object
 	 * @return string           The pad string itself
 	 */
@@ -430,7 +431,7 @@ class Hierarchy_Factory extends Hierarchy {
 	/**
 	 * Get the entries for a post type
 	 *
-	 * @since 0.6
+	 * @since 1.0
 	 * @param string $post_type     Post type
 	 * @param bool $hierarchical    Whether it's hierarchical
 	 * @return array                Post objects
@@ -472,6 +473,12 @@ class Hierarchy_Factory extends Hierarchy {
 		return $posts;
 	}
 
+	/**
+	 * Setter for accurate post types within object
+	 *
+	 * @since 1.0
+	 * @param $post_types
+	 */
 	function set_post_types( $post_types ) {
 		$this->post_types = $post_types;
 	}

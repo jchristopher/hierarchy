@@ -416,6 +416,7 @@ class Hierarchy {
 		$hierarchy_table = new Hierarchy_Table();
 		$hierarchy_table->set_url( $this->url );
 		$hierarchy_table->set_post_types( $this->post_types );
+		$hierarchy_table->set_settings( $this->settings );
 
 		$hierarchy_factory = new Hierarchy_Factory();
 		$hierarchy_factory->set_post_types( $this->post_types );

@@ -54,6 +54,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     function column_default( $item, $column_name ) {
         switch( $column_name ) {
             case 'title':
+	        case 'no_new':
             case 'order':
             case 'omit':
             case 'entries':
@@ -72,6 +73,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     function get_columns() {
         $columns = array(
             'title'         => 'Custom Post Type',
+	        'no_new'        => 'Prevent New',
             'entries'       => 'Show Entries',
             'omit'          => 'Omit',
             'order'         => 'Order',
@@ -103,6 +105,18 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     }
 
 
+	/**
+	 * Handle the No New column
+	 *
+	 * @param $item
+	 * @return string
+	 */
+	function column_no_new( $item ) {
+		$checked = ! empty( $item['no_new'] ) ? ' checked="checked"' : '';
+		return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][no_new]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][no_new]" value="1"' . $checked . ' />';
+	}
+
+
     /**
      * Handle the Omit column
      *
@@ -110,7 +124,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
      * @return string
      */
     function column_omit( $item ) {
-        $checked = $item['omit'] ? ' checked="checked"' : '';
+        $checked = ! empty( $item['omit'] ) ? ' checked="checked"' : '';
         return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][omit]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][omit]" value="1"' . $checked . ' />';
     }
 
@@ -122,7 +136,7 @@ class Hierarchy_Table_CPT extends WP_List_Table {
      * @return string
      */
     function column_entries( $item ) {
-        $checked = $item['entries'] ? ' checked="checked"' : '';
+        $checked = ! empty( $item['entries'] ) ? ' checked="checked"' : '';
         return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][entries]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][entries]" value="1"' . $checked . ' />';
     }
 

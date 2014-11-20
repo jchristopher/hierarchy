@@ -154,6 +154,7 @@ class Hierarchy_Settings extends Hierarchy {
 			}
 
 			$post_types[ $post_type ] = array(
+				'no_new'    => isset( $settings['no_new'] ) ? true : false,
 				'entries'   => isset( $settings['entries'] ) ? true : false,
 				'omit'      => isset( $settings['omit'] ) ? true : false,
 				'order'     => empty( $settings['order'] ) ? 0 : absint( $settings['order'] )
@@ -218,13 +219,15 @@ class Hierarchy_Settings extends Hierarchy {
 			$post_type_order = isset( $this->settings['post_types'][ $post_type->name ]['order'] ) ? absint( $this->settings['post_types'][ $post_type->name ]['order'] ) : 0;
 			$post_type_show_entries = empty( $this->settings['post_types'][ $post_type->name ]['entries'] ) ? false : true;
 			$post_type_omit = empty( $this->settings['post_types'][ $post_type->name ]['omit'] ) ? false : true;
+			$post_type_no_new = empty( $this->settings['post_types'][ $post_type->name ]['no_new'] ) ? false : true;
 
 			$post_types[] = array(
 				'name'      => $post_type->name,
 				'title'     => $post_type->labels->name,
 				'order'     => $post_type_order,
 				'entries'   => $post_type_show_entries,
-				'omit'      => $post_type_omit
+				'omit'      => $post_type_omit,
+				'no_new'    => $post_type_no_new,
 			);
 		}
 
@@ -251,6 +254,7 @@ class Hierarchy_Settings extends Hierarchy {
 		<div id="hierarchy-cpt-wrapper">
 			<?php $post_types_table->display(); ?>
 			<p>
+				<?php _e( '<strong>Prevent New:</strong> Hide "Add New" links', 'hierarchy' ); ?><br />
 				<?php _e( '<strong>Show Entries:</strong> Include CPT entries in the Hierarchy', 'hierarchy' ); ?><br />
 				<?php _e( '<strong>Omit:</strong> Ignore CPT completely in the Hierarchy', 'hierarchy' ); ?><br />
 				<?php _e( '<strong>Order:</strong> customize the <code>menu_order</code> for the CPT', 'hierarchy' ); ?>
@@ -261,9 +265,10 @@ class Hierarchy_Settings extends Hierarchy {
 			#hierarchy-cpt-wrapper p { padding-top:5px; }
 			#hierarchy-cpt-wrapper th { padding-left:10px; }
 			#hierarchy-cpt-wrapper .tablenav { display:none; }
-			#hierarchy-cpt-wrapper .column-title { width:50%; }
-			#hierarchy-cpt-wrapper .column-entries { width:20%; }
-			#hierarchy-cpt-wrapper .column-omit { width:15%; }
+			#hierarchy-cpt-wrapper .column-title { width:37%; }
+			#hierarchy-cpt-wrapper .column-no_new { width:19%; }
+			#hierarchy-cpt-wrapper .column-entries { width:19%; }
+			#hierarchy-cpt-wrapper .column-omit { width:10%; }
 			#hierarchy-cpt-wrapper .column-order { width:15%; }
 		</style>
 		<?php

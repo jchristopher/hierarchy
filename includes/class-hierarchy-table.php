@@ -14,6 +14,7 @@ class Hierarchy_Table extends WP_List_Table {
 	private $url;
 
 	private $post_types = array();
+	private $settings = array();
 
 	function __construct() {
 		parent::__construct( array(
@@ -31,6 +32,9 @@ class Hierarchy_Table extends WP_List_Table {
 		$this->post_types = $post_types;
 	}
 
+	public function set_settings( $settings ) {
+		$this->settings = $settings;
+	}
 
 	/**
 	 * Default column handler if there's no specific handler
@@ -130,6 +134,7 @@ class Hierarchy_Table extends WP_List_Table {
 
         $count          = 0;
         $count_label    = '';
+	    $post_type      = '';
 
         // we need to make this contextual as per the content type
         if( is_int( $item['ID'] ) )
@@ -150,6 +155,8 @@ class Hierarchy_Table extends WP_List_Table {
                     break;
                 }
             }
+
+	        $post_type = $cpt->name;
 
             $title = $item['pad'] . $cpt->labels->name;
 
@@ -195,8 +202,10 @@ class Hierarchy_Table extends WP_List_Table {
                 }
             }
 
-            $add_url = get_admin_url() . 'post-new.php?post_type=' . $cpt->name;
-            $actions['add'] = '<a href="' . $add_url . '">Add New</a>';
+	        if ( empty( $this->settings['post_types'][ $post_type ]['no_new'] ) ) {
+                $add_url = get_admin_url() . 'post-new.php?post_type=' . $cpt->name;
+                $actions['add'] = '<a href="' . $add_url . '">Add New</a>';
+	        }
 
             // let's see if we need to add any taxonomies
 	        $args       = array(
@@ -229,7 +238,18 @@ class Hierarchy_Table extends WP_List_Table {
         if( $count ) $final_title .= $count_label;
         $final_title .= $this->row_actions( $actions );
 
-        return $final_title;
+	    $final_markup = '';
+	    if ( ! empty( $post_type ) ) {
+		    $final_markup .= '<div class="hierarchy-row-post-type hierarchy-row-post-type-' . $post_type . '">';
+	    }
+
+	    $final_markup .= $final_title;
+
+	    if ( ! empty( $post_type ) ) {
+		    $final_markup .= '</div>';
+	    }
+
+        return  $final_markup;
     }
 
 

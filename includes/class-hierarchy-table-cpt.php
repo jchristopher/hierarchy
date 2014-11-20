@@ -32,16 +32,21 @@ class Hierarchy_Table_CPT extends WP_List_Table {
 	 * Setter for the settings fields prefix we need to use
 	 *
 	 * @since 0.6
-	 * @param $prefix
+	 * @param $prefix string    Prefix to use
 	 */
 	public function set_prefix( $prefix ) {
 		$this->prefix = $prefix;
 	}
 
+	/**
+	 * Setter for accurate post types array
+	 *
+	 * @since 0.6
+	 * @param $post_types array     Registered post types
+	 */
 	public function set_post_types( $post_types ) {
 		$this->post_types = $post_types;
 	}
-
 
     /**
      * Default column handler if there's no specific handler
@@ -64,7 +69,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
         }
     }
 
-
     /**
      * Define the columns we plan on using
      *
@@ -72,16 +76,15 @@ class Hierarchy_Table_CPT extends WP_List_Table {
      */
     function get_columns() {
         $columns = array(
-            'title'         => 'Custom Post Type',
-	        'no_new'        => 'Prevent New',
-            'entries'       => 'Show Entries',
-            'omit'          => 'Omit',
-            'order'         => 'Order',
+            'title'         => __( 'Custom Post Type', 'hierarchy' ),
+	        'no_new'        => __( 'Prevent New', 'hierarchy' ),
+            'entries'       => __( 'Show Entries', 'hierarchy' ),
+            'omit'          => __( 'Omit', 'hierarchy' ),
+            'order'         => __( 'Order', 'hierarchy' ),
         );
 
         return $columns;
     }
-
 
     /**
      * Handle the Title column
@@ -93,7 +96,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
         return $item['title'];
     }
 
-
     /**
      * Handle the Order column
      *
@@ -103,7 +105,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
     function column_order( $item ) {
         return '<input type="text" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][order]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][order]" value="' . absint( $item['order'] ) . '" class="small-text" />';
     }
-
 
 	/**
 	 * Handle the No New column
@@ -116,7 +117,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
 		return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][no_new]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][no_new]" value="1"' . $checked . ' />';
 	}
 
-
     /**
      * Handle the Omit column
      *
@@ -128,7 +128,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
         return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][omit]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][omit]" value="1"' . $checked . ' />';
     }
 
-
     /**
      * Handle the Entries column
      *
@@ -139,7 +138,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
         $checked = ! empty( $item['entries'] ) ? ' checked="checked"' : '';
         return '<input type="checkbox" name="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][entries]" id="' . esc_attr( $this->prefix ) . 'settings[post_types][' . esc_attr( $item['name'] ) . '][entries]" value="1"' . $checked . ' />';
     }
-
 
     /**
      * Preps the data for display in the table
@@ -160,7 +158,6 @@ class Hierarchy_Table_CPT extends WP_List_Table {
         // our data has been prepped (i.e. sorted) and we can now use it
         $this->items = $data;
     }
-
 
     /**
      * Overwrite the default display() function because we don't want the nonce

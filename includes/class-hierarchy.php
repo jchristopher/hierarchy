@@ -81,14 +81,18 @@ class Hierarchy {
 	 */
 	protected $menu_position = 3;
 
+	/**
+	 * CONSTRUCT
+	 */
 	function __construct() {
-		$this->plugin_name = 'hierarchy';
-		$this->prefix = '_iti_hierarchy_';
-		$this->version = '0.6';
-		$this->dir = plugin_dir_path( dirname( __FILE__ ) );
-		$this->url = plugins_url( 'hierarchy', $this->dir );
-		$this->capability = apply_filters( 'hierarchy_capability', 'manage_options' );
+		$this->plugin_name  = 'hierarchy';
+		$this->prefix       = '_iti_hierarchy_';
+		$this->version      = '0.6';
+		$this->dir          = plugin_dir_path( dirname( __FILE__ ) );
+		$this->url          = plugins_url( 'hierarchy', $this->dir );
+		$this->capability   = apply_filters( 'hierarchy_capability', 'manage_options' );
 
+		// initialize settings
 		if ( ! $this->settings = get_option( $this->prefix . 'settings' ) ) {
 			$this->settings = array(
 				'per_page' => -1,
@@ -120,14 +124,15 @@ class Hierarchy {
 	 */
 	function get_post_types() {
 		$args = array(
-			'public' => true,
-			'show_ui' => true,
+			'public'    => true,
+			'show_ui'   => true,
 		);
+
 		return get_post_types( $args, 'names', 'AND' );
 	}
 
 	/**
-	 * Initilize Hierarchy Settings class
+	 * Initialize Hierarchy Settings class
 	 *
 	 * @since 0.6
 	 */
@@ -252,9 +257,7 @@ class Hierarchy {
 	function add_menu_item() {
 		$this->set_menu_position();
 
-		// use Dashicons if possible, if not fall back to internal icon
-		$menu_icon = version_compare( get_bloginfo( 'version' ), '3.8', '>=' ) ? 'dashicons-category' : $this->url . '/images/icon-hierarchy-menu.png';
-
+		$menu_icon = 'dashicons-category';
 		$menu_label = apply_filters( 'hierarchy_menu_label', __( 'Content', 'hierarchy' ) );
 
 		add_menu_page(
@@ -439,19 +442,26 @@ class Hierarchy {
 	function show_hierarchy() {
 		$this->retrieve_post_types();
 
+		// prep the table itself
 		$hierarchy_table = new Hierarchy_Table();
 		$hierarchy_table->set_url( $this->url );
 		$hierarchy_table->set_post_types( $this->post_types );
 		$hierarchy_table->set_settings( $this->settings );
 
+		// build the Hierarchy
 		$hierarchy_factory = new Hierarchy_Factory();
 		$hierarchy_factory->set_post_types( $this->post_types );
 		$hierarchy = $hierarchy_factory->build();
 
-		$hierarchy_table->prepare_items( $hierarchy ); ?>
+		// tell the table about Hierarchy
+		$hierarchy_table->prepare_items( $hierarchy );
+
+		$page_title = apply_filters( 'hierarchy_menu_label', __( 'Content', 'hierarchy' ) );
+		$page_title = apply_filters( 'hierarchy_page_title', $page_title );
+		?>
 		<div class="wrap">
 			<div id="icon-page" class="icon32"><br/></div>
-			<h2><?php echo __( 'Content', 'hierarchy' ); ?></h2>
+			<h2><?php echo esc_html( $page_title ); ?></h2>
 			<div id="iti-hierarchy-wrapper">
 				<form id="iti-hierarchy-form" method="get">
 					<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>" />

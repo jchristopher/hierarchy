@@ -107,44 +107,6 @@ class Hierarchy {
 		}
 	}
 
-
-	function _check_capabilities( $capabilities, $post_id = null ) {
-		$has_cap = false;
-
-		if ( ! is_array( $capabilities ) ) {
-			$capabilities = array( (string) $capabilities );
-		}
-
-		// check to see if a relation has been defined
-		if ( ! isset( $capabilities['relation'] ) || ! is_string( $capabilities['relation'] ) ) {
-			$capabilities['relation'] = 'AND';
-		}
-
-		// validate relation
-		if ( ! in_array( strtoupper( $capabilities['relation'] ), array( 'AND', 'OR' ) ) ) {
-			$capabilities['relation'] = 'AND';
-		}
-
-		$relation = $capabilities['relation'];
-
-		foreach ( $capabilities as $capability ) {
-
-			$has_cap = current_user_can( $capability, $post_id ) ? true : false;
-
-			// if we only need one capability, we're good to go
-			if ( $has_cap && 'OR' == $relation ) {
-				break;
-			}
-
-			// AND logic means that any false capability means we're done here
-			if ( ! $has_cap && 'AND' == $relation ) {
-				break;
-			}
-		}
-
-		return $has_cap;
-	}
-
 	/**
 	 * Initializer, fired in plugin bootloader
 	 *

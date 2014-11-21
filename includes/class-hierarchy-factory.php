@@ -119,7 +119,13 @@ class Hierarchy_Factory extends Hierarchy {
 		}
 	}
 
-
+	/**
+	 * When a CPT is at the root of the Hierarchy we need to process it's posts slightly differently
+	 *
+	 * @since 1.0.2
+	 * @param $post_type string     The post type
+	 * @param $target_index         Where to inject into the Hierarchy
+	 */
 	function process_standalone_post_type_posts( $post_type, $target_index ) {
 
 		$post_type_obj = get_post_type_object( $post_type );

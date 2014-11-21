@@ -161,8 +161,12 @@ class Hierarchy_Table extends WP_List_Table {
 	function get_actions_for_post( $item ) {
 		$actions = array();
 
-		$edit_url = $this->get_item_edit_url( $item );
-		$actions['edit'] = '<a href="' . esc_url( $edit_url ) . '">Edit</a>';
+		$post_type_object = get_post_type_object( $item['post_type'] );
+
+		if ( current_user_can( 'edit_' . $post_type_object->capability_type, $item['ID'] ) ) {
+			$edit_url = $this->get_item_edit_url($item);
+			$actions['edit'] = '<a href="' . esc_url($edit_url) . '">Edit</a>';
+		}
 
 		$view_url = get_bloginfo( 'url' ) . '/?page_id=' . absint( $item['ID'] );
 		$actions['view'] = '<span class="view"><a href="' . esc_url( $view_url ) . '" rel="permalink">' . __( 'View', 'hierarchy' ) . '</a></span>';
@@ -175,9 +179,11 @@ class Hierarchy_Table extends WP_List_Table {
 	 *
 	 * @since 1.0
 	 * @param $item array   Hierarchy row item
+	 * @return array        Available actions
 	 */
 	function get_actions_for_post_type( $item ) {
 		$cpt = null;
+		$actions = array();
 
 		$posts_page = ( 'page' == get_option( 'show_on_front' ) ) ? intval( get_option( 'page_for_posts' ) ) : false;
 
@@ -190,9 +196,10 @@ class Hierarchy_Table extends WP_List_Table {
 
 		$post_type = $cpt->name;
 
-		$edit_url = $this->get_post_type_edit_url( $item );
-
-		$actions['edit'] = '<a href="' . $edit_url . '">Edit</a>';
+		if ( current_user_can( 'edit_' . $cpt->capability_type . 's', $item['ID'] ) ) {
+			$edit_url = $this->get_post_type_edit_url($item);
+			$actions['edit'] = '<a href="' . $edit_url . '">' . __( 'Edit', 'hierarchy' ) . '</a>';
+		}
 
 		// let's check to see if we in fact have a CPT archive to use for the View link
 		if( $cpt->has_archive || $cpt->name == 'post' && $posts_page ) {
@@ -204,7 +211,7 @@ class Hierarchy_Table extends WP_List_Table {
 		}
 
 		// only include Add link if applicable
-		if ( empty( $this->settings['post_types'][ $post_type ]['no_new'] ) ) {
+		if ( current_user_can( 'edit_' . $cpt->capability_type . 's', $item['ID'] ) && empty( $this->settings['post_types'][ $post_type ]['no_new'] ) ) {
 			$add_url = get_admin_url() . 'post-new.php?post_type=' . $cpt->name;
 			$actions['add'] = '<a href="' . $add_url . '">Add New</a>';
 		}
@@ -344,6 +351,7 @@ class Hierarchy_Table extends WP_List_Table {
      */
     function column_title( $item ) {
 
+	    $post_type_object = get_post_type_object( $item['post_type'] );
 	    $item = $item['entry'];
 
 	    $edit_url = is_int( $item['ID'] ) ? $this->get_item_edit_url( $item ) : $this->get_post_type_edit_url( $item );
@@ -351,7 +359,13 @@ class Hierarchy_Table extends WP_List_Table {
 	    $actions = is_int( $item['ID'] ) ? $this->get_actions_for_post( $item ) : $this->get_actions_for_post_type( $item );
 
         // return the title contents
-        $final_title = '<strong><a class="row-title" href="' . esc_url( $edit_url ) . '">' . esc_html( $title ) . '</a></strong>';
+	    if ( current_user_can( 'edit_' . $post_type_object->capability_type, $item['ID'] ) ) {
+		    $final_title = '<a class="row-title" href="' . esc_url( $edit_url ) . '">' . esc_html( $title ) . '</a>';
+	    } else {
+		    $final_title = esc_html( $title );
+	    }
+
+	    $final_title = '<strong>' . $final_title . '</strong>';
 
 
 	    if( ! is_int( $item['ID'] ) ) {

@@ -87,7 +87,7 @@ class Hierarchy {
 	function __construct() {
 		$this->plugin_name  = 'hierarchy';
 		$this->prefix       = '_iti_hierarchy_';
-		$this->version      = '1.0.2';
+		$this->version      = '1.0.3';
 		$this->dir          = plugin_dir_path( dirname( __FILE__ ) );
 		$this->url          = plugins_url( 'hierarchy', $this->dir );
 
@@ -521,7 +521,7 @@ class Hierarchy {
 				</form>
 			</div>
 			<style type="text/css">
-				.add-new-h2 span {
+				.add-new-h2 span.dashicons {
 					display:inline-block;
 					padding-top:0.4em;
 				}
@@ -577,7 +577,7 @@ class Hierarchy {
 		}
 
 		?>
-		<span class="hierarchy-add-new">
+		<div class="hierarchy-add-new">
 			<a href="#hierarchy-new" id="hierarchy-show-add-new" class="add-new-h2"><?php _e( 'Shortcuts', 'hierarchy' ); ?><span class="dashicons dashicons-arrow-right"></span></a>
 			<div id="hierarchy-new">
 				<ul>
@@ -614,7 +614,7 @@ class Hierarchy {
 					<?php endforeach; ?>
 				</ul>
 			</div>
-		</span>
+		</div>
 		<script>
 			jQuery(document).ready(function($){
 				var $dropdown = $('#hierarchy-new');

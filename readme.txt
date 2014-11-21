@@ -4,7 +4,7 @@ Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,12 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 5. Contextual links are included with each row in Hierarchy
 
 == Changelog ==
+
+= 1.0.3 =
+* Replaced 'Add New Page' button with a 'Shortcuts' button allowing for rapid access to post types and taxonomies
+* Capability checks before outputting links (clicking links without capabilities results in a permission denied screen)
+* New filter `hierarchy_settings_capability` to control who can see the Hierarchy settings
+* Improved l18n
 
 = 1.0.2 =
 * Fixed an issue where pagination wasn't displaying properly

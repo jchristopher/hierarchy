@@ -52,12 +52,18 @@ If you'd like a lot more information on the implementation and workflow changes 
 
 #### Changelog
 
+**1.0.3**
+* Replaced 'Add New Page' button with a 'Shortcuts' button allowing for rapid access to post types and taxonomies
+* Capability checks before outputting links (clicking links without capabilities results in a permission denied screen)
+* New filter `hierarchy_settings_capability` to control who can see the Hierarchy settings
+* Improved l18n
+
 **1.0.2**
 * Fixed an issue where pagination wasn't displaying properly
 * Fixed an issue where standalone (e.g. not 'child') CPT entries were not properly output
 
 **1.0.1**
-* Fixed a false positive that would incorrectly output post type entires
+* Fixed a false positive that would incorrectly output post type entries
 
 **1.0**
 * Complete refactor: reorganization, optimization, PHP Warning cleanup

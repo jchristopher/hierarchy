@@ -507,10 +507,12 @@ class Hierarchy {
 		<div class="wrap">
 			<div id="icon-page" class="icon32"><br/></div>
 			<h2>
-				<?php echo esc_html( $page_title ); ?>
-				<?php if ( apply_filters( 'hierarchy_add_new_page_button', true ) ) : ?>
-				<a href="<?php echo admin_url( 'post-new.php?post_type=page' ); ?>" class="add-new-h2"><?php _e( 'Add New Page', 'hierarchy' ); ?></a>
-				<?php endif; ?>
+				<?php
+					echo esc_html( $page_title );
+					if ( apply_filters( 'hierarchy_add_shortcuts_button', true ) ) {
+						$this->echo_shortcuts_ui();
+					}
+				?>
 			</h2>
 			<div id="iti-hierarchy-wrapper">
 				<form id="iti-hierarchy-form" method="get">
@@ -519,10 +521,173 @@ class Hierarchy {
 				</form>
 			</div>
 			<style type="text/css">
-				#iti-hierarchy-wrapper { margin-top:-2em; }
-				#iti-hierarchy-wrapper .column-icon { width:1em; text-align:center; }
+				.add-new-h2 span {
+					display:inline-block;
+					padding-top:0.4em;
+				}
+				#iti-hierarchy-wrapper {
+					margin-top:-2em;
+				}
+				#iti-hierarchy-wrapper .column-icon {
+					width:1em;
+					text-align:center;
+				}
 			</style>
 		</div>
 	<?php }
+
+	/**
+	 * Output the 'Shortcuts' button and post type dropdown
+	 *
+	 * @since 1.0.3
+	 */
+	function echo_shortcuts_ui() {
+
+		// use the active admin color scheme hover color
+		global $_wp_admin_css_colors;
+		$current_color = get_user_option( 'admin_color' );
+		$current_colors = isset( $_wp_admin_css_colors[ $current_color ] ) ? $_wp_admin_css_colors[ $current_color ] : $_wp_admin_css_colors[0];
+		$link_hover_color = isset( $current_colors->colors[3] ) ? $current_colors->colors[3] : '#2ea2cc';
+
+		// grab all post types that have not been omitted via Hierarchy settings
+		$potential_post_types = array();
+		foreach ( $this->post_types as $post_type ) {
+			if ( empty( $this->settings['post_types'][ $post_type ]['omit'] ) ) {
+				$potential_post_types[] = $post_type;
+			}
+		}
+
+		// allow user filtration of what's included in the shortcuts dropdown
+		$show_in_add_new = apply_filters( 'hierarchy_show_in_shortcuts', $potential_post_types );
+		$cpts = array();
+
+		// grab the post objects for all necessary post types
+		foreach ( $show_in_add_new as $post_type ) {
+			$cpts[$post_type] = get_post_type_object( $post_type );
+		}
+
+		// capability checks
+		if ( isset( $cpts['attachment'] ) && ! current_user_can( 'upload_files' ) ) {
+			unset( $cpts['attachment'] );
+		}
+		foreach( $cpts as $cpt => $properties ) {
+			if ( ! current_user_can( $properties->cap->create_posts ) ) {
+				unset( $cpt );
+			}
+		}
+
+		?>
+		<span class="hierarchy-add-new">
+			<a href="#hierarchy-new" id="hierarchy-show-add-new" class="add-new-h2"><?php _e( 'Shortcuts', 'hierarchy' ); ?><span class="dashicons dashicons-arrow-right"></span></a>
+			<div id="hierarchy-new">
+				<ul>
+					<?php foreach ( $cpts as $cpt ) : ?>
+						<li>
+							<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . $cpt->name ) ); ?>"><?php echo esc_html( $cpt->labels->menu_name ); ?></a>
+							<ul>
+								<li><a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . $cpt->name ) ); ?>"><?php echo esc_html( $cpt->labels->add_new_item ); ?></a></li>
+								<?php
+								// let's see if we need to add any taxonomies
+								$args = array(
+									'public'        => true,
+									'object_type'   => array( $cpt->name )
+								);
+								$output = 'objects';
+								$operator = 'and';
+								$taxonomies = get_taxonomies( $args, $output, $operator );
+								if ( ! empty( $taxonomies ) ) : ?>
+									<?php foreach( $taxonomies as $taxonomy ) : if( $taxonomy->name != 'post_format' ) : ?>
+										<?php
+										$tax_edit_url = 'edit-tags.php?taxonomy=' . $taxonomy->name;
+										if( $cpt->name != 'post' ) {
+											$tax_edit_url .= '&post_type=' . $cpt->name;
+										}
+										$tax_edit_url = admin_url( $tax_edit_url );
+										?>
+										<li>
+											<a href="<?php echo esc_url( $tax_edit_url ); ?>"><?php echo esc_html( $taxonomy->labels->name ); ?></a>
+										</li>
+									<?php endif; endforeach; ?>
+								<?php endif; ?>
+							</ul>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+		</span>
+		<script>
+			jQuery(document).ready(function($){
+				var $dropdown = $('#hierarchy-new');
+
+				var toggle_dropdown_visiblity = function(){
+					if($dropdown.is(':visible')){
+						$dropdown.hide();
+					}else{
+						$dropdown.show();
+					}
+				};
+
+				$('#hierarchy-show-add-new').click(function(){
+					toggle_dropdown_visiblity();
+					return false;
+				});
+				$(document).on('click',function(){
+					if($dropdown.is(':visible')){
+						$dropdown.hide();
+					}
+				});
+			});
+		</script>
+		<style type="text/css">
+			.hierarchy-add-new {
+				display:inline-block;
+				position:relative;
+			}
+			#hierarchy-new {
+				display:none;
+				font-size:0.55em;
+				position:absolute;
+				top:0;
+				left:100%;
+			}
+			#hierarchy-new ul {
+				list-style:none;
+				margin:0;
+				padding:0.2em 0 0.5em;
+				background:#333;
+				width:13em;
+				-webkit-box-shadow:0 3px 5px rgba(0,0,0,.2);
+				box-shadow:0 3px 5px rgba(0,0,0,.2);
+			}
+			#hierarchy-new li {
+				margin:0;
+				padding:0;
+				line-height:1.6em;
+			}
+			#hierarchy-new > ul > li {
+				position:relative;
+			}
+			#hierarchy-new > ul > li > ul {
+				position:absolute;
+				top:-0.2em; /* the padding-top of the parent ul */
+				left:100%;
+				width:13em;
+				display:none;
+			}
+			#hierarchy-new > ul > li:hover > ul {
+				display:block;
+			}
+			#hierarchy-new a {
+				display:block;
+				padding:0.2em 0.8em;
+				color:#fff;
+				text-decoration:none;
+			}
+			#hierarchy-new a:hover {
+				color:<?php echo $link_hover_color; ?>;
+			}
+		</style>
+	<?php
+	}
 
 }

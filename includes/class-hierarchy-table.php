@@ -164,11 +164,11 @@ class Hierarchy_Table extends WP_List_Table {
 		$post_type_object = get_post_type_object( $item['post_type'] );
 
 		if ( current_user_can( 'edit_' . $post_type_object->capability_type, $item['ID'] ) ) {
-			$edit_url = $this->get_item_edit_url($item);
-			$actions['edit'] = '<a href="' . esc_url($edit_url) . '">Edit</a>';
+			$edit_url = $this->get_item_edit_url( $item );
+			$actions['edit'] = '<a href="' . esc_url( $edit_url ) . '">' . __( 'Edit', 'hierarchy' ) . '</a>';
 		}
 
-		$view_url = get_bloginfo( 'url' ) . '/?page_id=' . absint( $item['ID'] );
+		$view_url = site_url( '/?page_id=' . absint( $item['ID'] ) );
 		$actions['view'] = '<span class="view"><a href="' . esc_url( $view_url ) . '" rel="permalink">' . __( 'View', 'hierarchy' ) . '</a></span>';
 
 		return $actions;
@@ -198,22 +198,22 @@ class Hierarchy_Table extends WP_List_Table {
 
 		if ( current_user_can( 'edit_' . $cpt->capability_type . 's', $item['ID'] ) ) {
 			$edit_url = $this->get_post_type_edit_url($item);
-			$actions['edit'] = '<a href="' . $edit_url . '">' . __( 'Edit', 'hierarchy' ) . '</a>';
+			$actions['edit'] = '<a href="' . esc_url( $edit_url ) . '">' . __( 'Edit', 'hierarchy' ) . '</a>';
 		}
 
 		// let's check to see if we in fact have a CPT archive to use for the View link
 		if( $cpt->has_archive || $cpt->name == 'post' && $posts_page ) {
 			if( $cpt->name == 'post' && $posts_page ) {
-				$actions['view'] = '<a href="' . get_permalink( $posts_page) . '">View</a>';
+				$actions['view'] = '<a href="' . esc_url( get_permalink( $posts_page) ) . '">' . __( 'View', 'hierarchy' ) . '</a>';
 			} else {
-				$actions['view'] = '<a href="' . get_post_type_archive_link( $cpt->name ) . '">View</a>';
+				$actions['view'] = '<a href="' . esc_url( get_post_type_archive_link( $cpt->name ) ) . '">' . __( 'View', 'hierarchy' ) . '</a>';
 			}
 		}
 
 		// only include Add link if applicable
 		if ( current_user_can( 'edit_' . $cpt->capability_type . 's', $item['ID'] ) && empty( $this->settings['post_types'][ $post_type ]['no_new'] ) ) {
-			$add_url = get_admin_url() . 'post-new.php?post_type=' . $cpt->name;
-			$actions['add'] = '<a href="' . $add_url . '">Add New</a>';
+			$add_url = admin_url( 'post-new.php?post_type=' . $cpt->name );
+			$actions['add'] = '<a href="' . esc_url( $add_url ) . '">' . __( 'Add New', 'hierarchy' ) . '</a>';
 		}
 
 		// let's see if we need to add any taxonomies
@@ -228,7 +228,7 @@ class Hierarchy_Table extends WP_List_Table {
 		if ( ! empty( $taxonomies ) ) {
 			foreach( $taxonomies as $taxonomy ) {
 				if( $taxonomy->name != 'post_format' ) {
-					$tax_edit_url = get_admin_url() . 'edit-tags.php?taxonomy=' . $taxonomy->name;
+					$tax_edit_url = admin_url( 'edit-tags.php?taxonomy=' . $taxonomy->name );
 					if( $cpt->name != 'post' ) {
 						$tax_edit_url .= '&post_type=' . $cpt->name;
 					}
@@ -248,7 +248,7 @@ class Hierarchy_Table extends WP_List_Table {
 	 * @return string           Edit URL for row item
 	 */
 	function get_item_edit_url( $item ) {
-		return esc_url( get_admin_url() . 'post.php?post=' . absint( $item['ID'] ) . '&action=edit' );
+		return esc_url( admin_url( 'post.php?post=' . absint( $item['ID'] ) . '&action=edit' ) );
 	}
 
 	/**
@@ -267,7 +267,7 @@ class Hierarchy_Table extends WP_List_Table {
 			}
 		}
 
-		return esc_url( get_admin_url() . 'edit.php?post_type=' . $cpt->name );
+		return esc_url( admin_url( 'edit.php?post_type=' . $cpt->name ) );
 	}
 
 	/**

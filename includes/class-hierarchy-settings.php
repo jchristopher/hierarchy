@@ -35,20 +35,10 @@ class Hierarchy_Settings extends Hierarchy {
 		add_options_page(
 			__( 'Hierarchy', 'hierarchy' ),
 			__( 'Hierarchy', 'hierarchy' ),
-			$this->capability,
+			apply_filters( 'hierarchy_settings_capability', 'manage_options' ),
 			'hierarchy-settings',
 			array( $this, 'admin_settings' )
 		);
-	}
-
-	/**
-	 * Setter for the capability for Hierarchy to use
-	 *
-	 * @since 0.6
-	 * @param $capability string    WordPress capability to use
-	 */
-	function set_capability( $capability ) {
-		$this->capability = $capability;
 	}
 
 	/**

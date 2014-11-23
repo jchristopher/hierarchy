@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Hierarchy\n"
-"POT-Creation-Date: 2014-11-23 01:19-0300\n"
-"PO-Revision-Date: 2014-11-23 01:19-0300\n"
+"POT-Creation-Date: 2014-11-23 01:21-0300\n"
+"PO-Revision-Date: 2014-11-23 01:22-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: en_US\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,107 +15,112 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
 "esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: includes/class-hierarchy-settings.php:36
 #: includes/class-hierarchy-settings.php:37
 msgid "Hierarchy"
-msgstr ""
+msgstr "Hierarquia"
 
 #: includes/class-hierarchy-settings.php:79
 #: includes/class-hierarchy-settings.php:120
 msgid "Settings"
-msgstr ""
+msgstr "Configurações"
 
 #: includes/class-hierarchy-settings.php:87
 msgid "Custom Post Type Locations"
-msgstr ""
+msgstr "Posições dos Tipos de Post"
 
 #: includes/class-hierarchy-settings.php:96
 msgid "Items per page"
-msgstr ""
+msgstr "Itens por página"
 
 #: includes/class-hierarchy-settings.php:105
 msgid "Hide from the Admin Menu"
-msgstr ""
+msgstr "Ocultar do menu de administração"
 
 #: includes/class-hierarchy-settings.php:127
 msgid "Save Settings"
-msgstr ""
+msgstr "Salvar Configurações"
 
 #: includes/class-hierarchy-settings.php:252
 msgid "<strong>Prevent New:</strong> Hide \"Add New\" links"
-msgstr ""
+msgstr "<strong>Impedir Novo:</strong> Oculta link \"Adicionar Novo\""
 
 #: includes/class-hierarchy-settings.php:253
 msgid "<strong>Show Entries:</strong> Include CPT entries in the Hierarchy"
 msgstr ""
+"<strong>Exibir Publicações:</strong> Inclui publicações do Tipo de Post na "
+"Hierarquia"
 
 #: includes/class-hierarchy-settings.php:254
 msgid "<strong>Omit:</strong> Ignore CPT completely in the Hierarchy"
 msgstr ""
+"<strong>Omitir:</strong> Ignora completamente o Tipo de Post na Hierarquia"
 
 #: includes/class-hierarchy-settings.php:255
 msgid ""
 "<strong>Order:</strong> customize the <code>menu_order</code> for the CPT"
 msgstr ""
+"<strong>Ordem:</strong> personaliza o <code>menu_order</code> para o Tipo de "
+"Post"
 
 #: includes/class-hierarchy-settings.php:279
 msgid "To show all, use <strong>-1</strong>"
-msgstr ""
+msgstr "Para exibir todos, use <strong>-1</strong>"
 
 #: includes/class-hierarchy-table-cpt.php:79
 msgid "Custom Post Type"
-msgstr ""
+msgstr "Tipo de Post"
 
 #: includes/class-hierarchy-table-cpt.php:80
 msgid "Prevent New"
-msgstr ""
+msgstr "Impedir Novo"
 
 #: includes/class-hierarchy-table-cpt.php:81
 msgid "Show Entries"
-msgstr ""
+msgstr "Exibir Publicações"
 
 #: includes/class-hierarchy-table-cpt.php:82
 msgid "Omit"
-msgstr ""
+msgstr "Omitir"
 
 #: includes/class-hierarchy-table-cpt.php:83
 msgid "Order"
-msgstr ""
+msgstr "Ordem"
 
 #: includes/class-hierarchy-table.php:103
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 #: includes/class-hierarchy-table.php:104
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: includes/class-hierarchy-table.php:106
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: includes/class-hierarchy-table.php:168
 #: includes/class-hierarchy-table.php:201
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: includes/class-hierarchy-table.php:172
 #: includes/class-hierarchy-table.php:207
 #: includes/class-hierarchy-table.php:209
 msgid "View"
-msgstr ""
+msgstr "Ver"
 
 #: includes/class-hierarchy-table.php:216
 msgid "Add New"
-msgstr ""
+msgstr "Adicionar Novo"
 
 #: includes/class-hierarchy.php:267 includes/class-hierarchy.php:467
 msgid "Content"
-msgstr ""
+msgstr "Conteúdo"
 
 #: includes/class-hierarchy.php:544
 msgid "Shortcuts"
-msgstr ""
+msgstr "Atalhos"

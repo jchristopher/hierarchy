@@ -175,6 +175,7 @@ class Hierarchy {
 	function set_locale() {
 		$plugin_i18n = new Hierarchy_i18n();
 		$plugin_i18n->set_domain( $this->get_plugin_name() );
+		$plugin_i18n->load_plugin_textdomain();
 	}
 
 	/**

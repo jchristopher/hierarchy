@@ -53,7 +53,7 @@ If you'd like a lot more information on the implementation and workflow changes 
 #### Changelog
 
 **1.0.4**
-* Taxonomies are now contingent on `show_ui` instead of `public`
+* Taxonomies are no longer contingent `public` being true
 * Updated WP_List_Table compat with WordPress 4.4
 
 **1.0.3**

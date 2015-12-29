@@ -57,7 +57,7 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 == Changelog ==
 
 = 1.0.4 =
-* Taxonomies are now contingent on `show_ui` instead of `public`
+* Taxonomies are no longer contingent `public` being true
 * Updated WP_List_Table compat with WordPress 4.4
 
 = 1.0.3 =

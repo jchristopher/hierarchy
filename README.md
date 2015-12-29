@@ -55,6 +55,7 @@ If you'd like a lot more information on the implementation and workflow changes 
 **1.0.4**
 * Taxonomies are no longer contingent `public` being true
 * Updated WP_List_Table compat with WordPress 4.4
+* Added pt-BR translation, props brenoalvs
 
 **1.0.3**
 * Replaced 'Add New Page' button with a 'Shortcuts' button allowing for rapid access to post types and taxonomies

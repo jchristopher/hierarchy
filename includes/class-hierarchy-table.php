@@ -218,9 +218,8 @@ class Hierarchy_Table extends WP_List_Table {
 
 		// let's see if we need to add any taxonomies
 		$args = array(
-			'public'        => true,
-			'object_type'   => array( $cpt->name ),
 			'show_in_menu'  => true,
+			'object_type'   => array( $cpt->name ),
 		);
 		$output = 'objects';
 		$operator = 'and';

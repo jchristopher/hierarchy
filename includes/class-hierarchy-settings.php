@@ -256,7 +256,9 @@ class Hierarchy_Settings extends Hierarchy {
 			</p>
 		</div>
 		<style type="text/css">
-			#poststuff > h3 { display:none; }
+			#poststuff > h3,
+			#poststuff > h2 { display:none; }
+			#hierarchy-cpt-wrapper .toggle-row { display:none; }
 			#hierarchy-cpt-wrapper p { padding-top:5px; }
 			#hierarchy-cpt-wrapper th { padding-left:10px; }
 			#hierarchy-cpt-wrapper .tablenav { display:none; }

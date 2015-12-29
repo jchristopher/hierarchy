@@ -4,7 +4,7 @@ Donate link: http://mondaybynoon.com/donate/
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.8
 Tested up to: 4.2
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,10 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 5. Contextual links are included with each row in Hierarchy
 
 == Changelog ==
+
+= 1.0.4 =
+* Taxonomies are now contingent on `show_ui` instead of `public`
+* Updated WP_List_Table compat with WordPress 4.4
 
 = 1.0.3 =
 * Replaced 'Add New Page' button with a 'Shortcuts' button allowing for rapid access to post types and taxonomies

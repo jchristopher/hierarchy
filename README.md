@@ -52,6 +52,10 @@ If you'd like a lot more information on the implementation and workflow changes 
 
 #### Changelog
 
+**1.0.4**
+* Taxonomies are now contingent on `show_ui` instead of `public`
+* Updated WP_List_Table compat with WordPress 4.4
+
 **1.0.3**
 * Replaced 'Add New Page' button with a 'Shortcuts' button allowing for rapid access to post types and taxonomies
 * Capability checks before outputting links (clicking links without capabilities results in a permission denied screen)

@@ -87,7 +87,7 @@ class Hierarchy {
 	function __construct() {
 		$this->plugin_name  = 'hierarchy';
 		$this->prefix       = '_iti_hierarchy_';
-		$this->version      = '1.0.3';
+		$this->version      = '1.0.4';
 		$this->dir          = plugin_dir_path( dirname( __FILE__ ) );
 		$this->url          = plugins_url( 'hierarchy', $this->dir );
 
@@ -552,7 +552,7 @@ class Hierarchy {
 								<?php
 								// let's see if we need to add any taxonomies
 								$args = array(
-									'public'        => true,
+									'show_in_menu'  => true,
 									'object_type'   => array( $cpt->name )
 								);
 								$output = 'objects';

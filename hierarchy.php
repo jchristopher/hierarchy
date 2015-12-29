@@ -3,13 +3,13 @@
  Plugin Name: Hierarchy
  Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 1.0.3
+ Version: 1.0.4
  Author: Jonathan Christopher
  Author URI: http://mondaybynoon.com/
  Text Domain: hierarchy
 */
 
-/*  Copyright 2012-2014 Jonathan Christopher (email : jonathan@irontoiron.com)
+/*  Copyright 2012-2015 Jonathan Christopher (email : jonathan@irontoiron.com)
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

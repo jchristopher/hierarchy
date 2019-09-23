@@ -485,15 +485,15 @@ class Hierarchy {
 			</div>
 			<style type="text/css">
 				.add-new-h2 span.dashicons {
-					display:inline-block;
-					padding-top:0.4em;
+					display: inline-block;
+					padding-top: 0.45em;
 				}
 				#iti-hierarchy-wrapper {
-					margin-top:-2em;
+					margin-top: -2em;
 				}
 				#iti-hierarchy-wrapper .column-icon {
-					width:1em;
-					text-align:center;
+					width: 1em;
+					text-align: center;
 				}
 			</style>
 		</div>

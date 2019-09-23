@@ -468,14 +468,21 @@ class Hierarchy {
 		$page_title = apply_filters( 'hierarchy_page_title', $page_title );
 		?>
 		<div class="wrap">
-			<div id="icon-page" class="icon32"><br/></div>
-			<h2>
-				<?php
-					echo esc_html( $page_title );
-					if ( apply_filters( 'hierarchy_add_shortcuts_button', true ) ) {
-						$this->echo_shortcuts_ui();
-					}
-				?>
+			<h2 class="hierarchy-heading">
+				<span class="hierarchy-heading__title">
+					<?php echo esc_html( $page_title ); ?>
+				</span>
+				<?php if ( apply_filters( 'hierarchy_add_shortcuts_button', true ) ) : ?>
+					<span class="hierarchy-heading__shortcuts">
+						<?php $this->echo_shortcuts_ui(); ?>
+					</span>
+				<?php endif; ?>
+				<?php if ( apply_filters( 'hierarchy_organizewp_notice', true ) ) : ?>
+					<span class="hierarchy-heading__organizewp-notice">
+						<span class="dashicons dashicons-star-filled"></span> Enjoying Hierarchy? Check out
+						<a href="https://organizewp.com/?utm_source=wordpressorg&utm_medium=link&utm_campaign=hierarchy" target="_blank">OrganizeWP</a>!
+					</span>
+				<?php endif; ?>
 			</h2>
 			<div id="iti-hierarchy-wrapper">
 				<form id="iti-hierarchy-form" method="get">
@@ -484,6 +491,40 @@ class Hierarchy {
 				</form>
 			</div>
 			<style type="text/css">
+				.hierarchy-heading {
+					display: flex;
+					align-items: center;
+				}
+
+				.hierarchy-heading__shortcuts {
+					display: block;
+					margin-left: 7px;
+				}
+
+				.hierarchy-heading__organizewp-notice {
+					display: block;
+					margin-left: auto;
+					font-size: 14px;
+				}
+
+				.hierarchy-heading__organizewp-notice {
+					display: flex;
+					align-items: center;
+				}
+
+				.hierarchy-heading__organizewp-notice span,
+				.hierarchy-heading__organizewp-notice a {
+					display: block;
+				}
+
+				.hierarchy-heading__organizewp-notice span {
+					margin-right: 0.25em;
+				}
+
+				.hierarchy-heading__organizewp-notice a {
+					margin-left: 0.35em;
+				}
+
 				.add-new-h2 span.dashicons {
 					display: inline-block;
 					padding-top: 0.45em;

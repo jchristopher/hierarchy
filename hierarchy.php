@@ -1,15 +1,15 @@
 <?php
 /*
  Plugin Name: Hierarchy
- Plugin URI: http://mondaybynoon.com/wordpress-hierarchy/
+ Plugin URI: https://jonchristopher.us/projects/organizewp/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 1.0.4
+ Version: 1.0.4.1
  Author: Jonathan Christopher
- Author URI: http://mondaybynoon.com/
+ Author URI: https://jonchristopher.us/
  Text Domain: hierarchy
 */
 
-/*  Copyright 2012-2015 Jonathan Christopher (email : jonathan@irontoiron.com)
+/*  Copyright 2012-2019 Jonathan Christopher (email : jon@jonchristopher.us)
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

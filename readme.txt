@@ -11,6 +11,8 @@ Move your Pages/Posts/Custom Post Type admin links from the sidebar to a Content
 
 == Description ==
 
+**NOTE**: If you're looking for something more user-focused, take a look at [OrganizeWP](https://organizewp.com/?utm_source=wordpressorg&utm_medium=link&utm_campaign=readme) which is complete rethinking of Hierarchy!
+
 Custom Post Types (sometimes) need context, Hierarchy allows you to rework your content management workflow by essentially **moving Custom Post Type admin menus into your Pages list**. What this does is mimic the navigation you've set up on your site by placing Custom Post Type edit links amongst your Pages where they belong.
 
 [**&raquo; Check out the screenshots to see Hierarchy in action**](https://wordpress.org/plugins/hierarchy/screenshots/)

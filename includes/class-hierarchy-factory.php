@@ -529,7 +529,7 @@ class Hierarchy_Factory extends Hierarchy {
 				'ID'        => $post->ID,
 				'post_type' => $post->post_type,
 				'title'     => $title,
-				'author'    => $author->display_name,
+				'author'    => isset( $author->display_name ) ? $author->display_name : '',
 				'comments'  => $post->comment_count,
 				'date'      => date( get_option( 'date_format' ), strtotime( $post->post_date ) ),
 				'order'     => $post->menu_order,

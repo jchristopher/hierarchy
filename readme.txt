@@ -55,8 +55,12 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 
 == Changelog ==
 
-= 1.0.5 =
+= 1.0.5.1 =
+* Fixes PHP Warning
 * Tested up to WordPress 5.2.3
+
+= 1.0.5 =
+* Tested up to WordPress 4.9
 
 = 1.0.4 =
 * Taxonomies are no longer contingent `public` being true

@@ -1,9 +1,9 @@
 <?php
 /*
  Plugin Name: Hierarchy
- Plugin URI: https://jonchristopher.us/projects/organizewp/
+ Plugin URI: https://github.com/jchristopher/hierarchy/
  Description: Properly structure your Pages, Posts, and Custom Post Types
- Version: 1.0.4.1
+ Version: 1.0.5.1
  Author: Jonathan Christopher
  Author URI: https://jonchristopher.us/
  Text Domain: hierarchy

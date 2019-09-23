@@ -52,6 +52,9 @@ If you'd like a lot more information on the implementation and workflow changes 
 
 #### Changelog
 
+**1.0.5**
+* Tested for WordPress 4.9
+
 **1.0.4**
 * Taxonomies are no longer contingent `public` being true
 * Updated WP_List_Table compat with WordPress 4.4

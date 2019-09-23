@@ -3,15 +3,13 @@ Contributors: jchristopher
 Tags: hierarchy, pages, cpt, custom post types, url, routing
 Requires at least: 3.8
 Tested up to: 5.2.3
-Stable tag: 1.0.4.1
+Stable tag: 1.0.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Move your Pages/Posts/Custom Post Type admin links from the sidebar to a Content menu that nests everything where it should be
 
 == Description ==
-
-**NOTE**: If you're looking for something more user-focused, take a look at [OrganizeWP](https://organizewp.com/?utm_source=wordpressorg&utm_medium=link&utm_campaign=readme) which is complete rethinking of Hierarchy!
 
 Custom Post Types (sometimes) need context, Hierarchy allows you to rework your content management workflow by essentially **moving Custom Post Type admin menus into your Pages list**. What this does is mimic the navigation you've set up on your site by placing Custom Post Type edit links amongst your Pages where they belong.
 
@@ -56,6 +54,9 @@ You have a WordPress `page` with the slug of `about` and you have a CPT for Team
 5. Contextual links are included with each row in Hierarchy
 
 == Changelog ==
+
+= 1.0.5 =
+* Tested up to WordPress 5.2.3
 
 = 1.0.4 =
 * Taxonomies are no longer contingent `public` being true
